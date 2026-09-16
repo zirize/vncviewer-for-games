@@ -1,0 +1,28 @@
+# What a build leaves behind, and what must never leave this machine.
+#
+# 🔴 local.properties is the important line. It carries the SDK path *and* the development
+#    server's address and password - that is exactly why the password is kept there and not in
+#    the source. Without this file, `git add -A` after a build offers to commit it.
+
+# Build output
+build/
+.gradle/
+.kotlin/
+.cxx/
+.externalNativeBuild/
+captures/
+*.apk
+*.aab
+*.hprof
+
+# Host- and person-specific; never published
+local.properties
+local.properties.*
+keystore.properties
+*.jks
+*.keystore
+
+# IDE
+.idea/
+*.iml
+.DS_Store

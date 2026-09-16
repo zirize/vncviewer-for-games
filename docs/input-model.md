@@ -12,7 +12,8 @@ this page disagree, the code wins and this page is wrong.
 ```
 on-screen buttons ─┐
 physical keyboard ─┼─→ ModifierLatchController ─→ KeyInputController ─┐
-                   │        (policy)                  (the ledger)    │
+typed text ────────┤        (policy)                  (the ledger)    │
+  (TextInput)      │                                                  │
 touches ───────────┴─→ PointerInputController ─────────────────────── ┼─→ VncEngine → server
                               (gestures)                              │   (the send gate)
 ```
@@ -106,6 +107,45 @@ the screen is fine, and **only the game fails to respond**.
 `VncKeySym.resolve()` accepts three spellings — a constant name (`"PageUp"`), a single character
 (`"f"`), or a number (`"0xFF55"`). `input/VncKeys.kt` is the one registry; there is no second table
 to keep in sync. The profile validator rejects any keysym in `A`–`Z`.
+
+---
+
+## Typing
+
+The panel can only carry the keys a *game* needs. A save name, a chat line, a password box on the
+remote desktop is a **sentence**, and a sentence is not a button. That is what the `Keyboard`
+section at the top of the settings sheet is for: type into the field with the phone's own keyboard
+and press Send.
+
+**It sends keys, not the clipboard.** A paste needs the remote side to cooperate, and the extended
+clipboard is the option that has hung x11vnc-family servers before. Key presses land wherever a
+keyboard lands, including in a game that never heard of Ctrl+V.
+
+**Nothing new reaches the socket.** `TextInput.toKeySyms` turns the string into keysyms and every
+one of them goes out through `tapKey`, i.e. through the latch and the ledger like any other key.
+🔑 Opening settings has already called `releaseAllInput`, so nothing is armed while you type — an
+armed `CTRL` cannot silently turn the first letter into a shortcut.
+
+`TextInput` is where the string's rules live, and they are tested with no device:
+
+- **Code points, not chars.** An emoji is a surrogate *pair*; one keysym per half is two keysyms
+  that are not any character at all.
+- `\r\n` is **one** Return, tabs are `Tab`, and other control characters are dropped — no key
+  types them.
+- **Capped at 1000 keys.** Every character is a down/up pair and those are never coalesced (losing
+  one would lose a keystroke), so a pasted wall of text would queue thousands of messages ahead of
+  the next touch.
+- **Uppercase stays uppercase** — the exact opposite of the button rule above, and deliberately so.
+  A button labelled `F` must send lowercase `f`, but text that says `F` means a capital F.
+  ❓ The server is assumed to hold Shift for it (x11vnc fakes the modifier itself). Not measured here.
+
+Three ways out of the field: **Send**, **Send + Enter**, and **Enter only**. The phone keyboard's
+own action key is the second of those — it means "and confirm" everywhere else, so it does here.
+The empty field plus **Enter only** is how you confirm a dialog on the remote while the sheet is
+covering the panel's ↵ button.
+
+❓ The sheet **stays open** after a send, so the result is not visible until it is closed. The
+alternative — closing on send — costs a re-open for every line.
 
 ---
 

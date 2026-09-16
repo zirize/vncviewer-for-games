@@ -175,6 +175,18 @@ object VncKeyMapper {
         val cp = c.code
         if (cp == '\n'.code || cp == '\r'.code) return VncKeySym.Return
         if (cp == '\t'.code) return VncKeySym.Tab
+        return codePointToKeySym(cp)
+    }
+
+    /**
+     * One **code point** to a keysym, by the same X11 rule.
+     *
+     * 🔴 A char is not a character. Anything above U+FFFF - an emoji, most of them - is a
+     * surrogate *pair* in a Kotlin string, and mapping each half on its own yields two keysyms
+     * that are not any character at all. Text goes through here; single keys still go through
+     * [charToKeySym].
+     */
+    fun codePointToKeySym(cp: Int): Int {
         if (cp in 0x20..0xFF) return cp
         return 0x01000000 + cp
     }
@@ -190,6 +202,23 @@ object VncKeyMapper {
         return 0
     }
 
-    /** A string to a list of keysyms. Used by "send text" and clipboard paste. */
-    fun textToKeySyms(text: String): List<Int> = text.map { charToKeySym(it) }
+    /**
+     * A string to a list of keysyms.
+     * 🔑 Walks **code points**, so a surrogate pair stays one keysym. What a *user* types goes
+     * through [TextInput] instead, which also drops control characters and caps the length.
+     */
+    fun textToKeySyms(text: String): List<Int> {
+        val out = ArrayList<Int>(text.length)
+        var i = 0
+        while (i < text.length) {
+            val cp = text.codePointAt(i)
+            i += Character.charCount(cp)
+            out += when (cp) {
+                '\n'.code, '\r'.code -> VncKeySym.Return
+                '\t'.code -> VncKeySym.Tab
+                else -> codePointToKeySym(cp)
+            }
+        }
+        return out
+    }
 }

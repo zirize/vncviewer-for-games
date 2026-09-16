@@ -14,12 +14,20 @@
     <string name="conn_stale_picture">화면은 마지막으로 받은 그림입니다</string>
     <string name="conn_retry">다시 시도</string>
 
+    <string name="settings_section_keyboard">키보드</string>
     <string name="settings_section_quick">빠른 설정</string>
     <string name="settings_section_input">입력</string>
     <string name="settings_section_connection">접속</string>
     <string name="settings_section_display">화면·성능</string>
     <string name="settings_applies_now">즉시 적용</string>
     <string name="settings_applies_next_connection">다음 접속부터</string>
+    <string name="settings_sends_now">누르면 바로 전송</string>
+
+    <string name="settings_send_text">원격 화면에 입력할 글자</string>
+    <string name="settings_send_text_hint">원격 화면에서 «포커스가 있는 곳»에 한 글자씩 «키로» 들어갑니다. 클립보드 붙여넣기가 아니라서 게임 안에서도 됩니다.</string>
+    <string name="settings_send">보내기</string>
+    <string name="settings_send_enter">보내고 Enter</string>
+    <string name="settings_enter_only">Enter만</string>
 
     <string name="settings_trackpad_mode">트랙패드 모드 (끄면 닿은 자리로 커서 이동)</string>
     <string name="settings_two_finger_scroll">두 손가락 스크롤</string>

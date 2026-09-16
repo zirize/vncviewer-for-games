@@ -62,4 +62,14 @@ class VncKeyMapperTest {
         assertEquals(listOf('h'.code, 'i'.code), VncKeyMapper.textToKeySyms("hi"))
         assertEquals(listOf(VncKeySym.Return), VncKeyMapper.textToKeySyms("\n"))
     }
+
+    /**
+     * 🔴 Walked by **code point**, not by char: an emoji is a surrogate pair, and one keysym per
+     * half is two keysyms that are not any character at all.
+     */
+    @Test
+    fun textWalksCodePointsNotChars() {
+        assertEquals(listOf(0x01000000 + 0x1F600), VncKeyMapper.textToKeySyms("😀"))
+        assertEquals(0x01000000 + 0x1F600, VncKeyMapper.codePointToKeySym(0x1F600))
+    }
 }

@@ -27,6 +27,10 @@ and you can regenerate it for whoever is going to hold the phone.
 - **Latching modifiers.** Tap Ctrl for one-shot, tap twice to lock. You do not need a second hand.
 - **Trackpad or absolute pointing.** Long-press for right click, two-finger scroll.
 - **Tight/JPEG decoding on four worker threads**, through libjpeg-turbo with NEON.
+- **Typing, for when the game asks for a name.** The settings sheet opens with a text field at
+  the top; you type with the phone's own keyboard — so your IME's language is your business, not
+  this app's — and it goes out as **key presses, not a clipboard paste**, which is why it lands
+  inside a game too.
 - **A settings sheet that opens itself** if the very first connection fails, so a fresh install
   is never a dead end.
 

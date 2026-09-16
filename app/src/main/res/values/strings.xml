@@ -17,12 +17,21 @@
     <string name="conn_retry">Retry</string>
 
     <!-- ── Settings: sections ──────────────────────────────────────── -->
+    <string name="settings_section_keyboard">Keyboard</string>
     <string name="settings_section_quick">Quick settings</string>
     <string name="settings_section_input">Input</string>
     <string name="settings_section_connection">Connection</string>
     <string name="settings_section_display">Display and performance</string>
     <string name="settings_applies_now">applies immediately</string>
     <string name="settings_applies_next_connection">from the next connection</string>
+    <string name="settings_sends_now">sent when you press it</string>
+
+    <!-- ── Settings: keyboard ──────────────────────────────────────── -->
+    <string name="settings_send_text">Text to type on the remote screen</string>
+    <string name="settings_send_text_hint">Typed one key at a time, into whatever has the keyboard focus over there. It is not a clipboard paste, so it also works inside a game.</string>
+    <string name="settings_send">Send</string>
+    <string name="settings_send_enter">Send + Enter</string>
+    <string name="settings_enter_only">Enter only</string>
 
     <!-- ── Settings: quick ─────────────────────────────────────────── -->
     <string name="settings_trackpad_mode">Trackpad mode (off = cursor jumps to where you touch)</string>

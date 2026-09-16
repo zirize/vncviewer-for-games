@@ -27,6 +27,7 @@ import io.github.zirize.vncviewerforgames.input.PointerCommand
 import io.github.zirize.vncviewerforgames.input.PointerConfig
 import io.github.zirize.vncviewerforgames.input.PointerInputController
 import io.github.zirize.vncviewerforgames.input.PointerMode
+import io.github.zirize.vncviewerforgames.input.TextInput
 import io.github.zirize.vncviewerforgames.input.TouchAction
 import io.github.zirize.vncviewerforgames.input.TouchEvent
 import io.github.zirize.vncviewerforgames.input.VncButton
@@ -391,9 +392,20 @@ class VncSurfaceView @JvmOverloads constructor(
         dispatchKeys(latch.tapModifier(keySym, SystemClock.uptimeMillis()))
     }
 
-    /** Types a string one character at a time (non-Latin-1 goes out as Unicode keysyms). */
-    fun sendText(text: String) {
-        for (sym in VncKeyMapper.textToKeySyms(text)) tapKey(sym)
+    /**
+     * Types a string one key at a time, the way a keyboard would.
+     *
+     * 🔑 **This is the app's keyboard.** The on-screen panel can only carry the keys a game needs;
+     * a save name or a chat line is a sentence, and the way in is the settings sheet (top section),
+     * where the phone's own keyboard - Korean and all - does the typing.
+     * 🔴 It goes out as **key presses, not a clipboard paste**, so it works in a game that has
+     * never heard of Ctrl+V. What the text turns into is [TextInput]'s decision, not this view's.
+     *
+     * [appendReturn] adds a final Return - "send and confirm". Passing an empty string with it set
+     * is how the sheet's Enter button presses Enter and nothing else.
+     */
+    fun sendText(text: String, appendReturn: Boolean = false) {
+        for (sym in TextInput.toKeySyms(text, appendReturn)) tapKey(sym)
     }
 
     /** The keysyms currently down; what the on-screen CTRL button colours itself from. */

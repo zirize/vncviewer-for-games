@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -33,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.zirize.vncviewerforgames.R
@@ -68,12 +72,26 @@ fun SettingsSheet(view: VncSurfaceView, onDismiss: () -> Unit) {
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
-            Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 32.dp),
+            // 🔑 `imePadding` because this sheet now has a text field people actually type into.
+            //    Without it the phone's keyboard covers the bottom half of the sheet and there is
+            //    no way to scroll what it covers into view.
+            Modifier.verticalScroll(rememberScrollState()).imePadding()
+                .padding(horizontal = 20.dp).padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             @Suppress("UNUSED_EXPRESSION") tick   // the hook that redraws when a value changes
 
             PendingBar(view, onReconnect = { view.retryConnection(); changed() })
+
+            // 🔴 **The keyboard is first, above everything.** It is not a setting at all - it is a
+            //    thing you came here to *do*, in the middle of a game, when the remote side asked
+            //    for a name or a password and the on-screen panel has no letters on it. Anything
+            //    below the fold would be missed at the moment it is needed.
+            // 🔑 Typing happens in the phone's own keyboard, which is what makes Korean (and every
+            //    other IME language) work without this app knowing anything about it.
+            SectionTitle(stringResource(R.string.settings_section_keyboard),
+                stringResource(R.string.settings_sends_now))
+            SendTextRow { text, withReturn -> view.sendText(text, withReturn) }
 
             // 🔑 **There is deliberately no disconnect or reconnect button here.**
             //    (a) An ordinary failure retries by itself once a second, so there is nothing to press.
@@ -218,6 +236,56 @@ private fun PendingBar(view: VncSurfaceView, onReconnect: () -> Unit) {
                 }, style = MaterialTheme.typography.bodySmall)
             }
             Button(onClick = onReconnect) { Text(stringResource(R.string.settings_reconnect_now)) }
+        }
+    }
+}
+
+/**
+ * Type a line here, press Send, and it is **typed** on the remote screen.
+ *
+ * 🔴 **Keys, not a paste.** A clipboard paste needs the remote side to cooperate, and the extended
+ * clipboard is the option that has hung x11vnc-family servers before. Key presses land anywhere a
+ * keyboard lands - including a game that has never heard of Ctrl+V.
+ *
+ * 🔑 **The field is cleared after every send**, because the second press of Send would otherwise
+ * type the same line again, and there is nothing on screen to say whether the first one arrived.
+ * ❓ Assumption: the sheet **stays open** after a send. Closing it would show the result, but then
+ * sending two lines means re-opening settings twice.
+ */
+@Composable
+private fun SendTextRow(onSend: (String, Boolean) -> Unit) {
+    var text by remember { mutableStateOf("") }
+    fun send(withReturn: Boolean) { onSend(text, withReturn); text = "" }
+
+    Column(Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text(stringResource(R.string.settings_send_text)) },
+            singleLine = true,
+            // 🔑 The phone keyboard's own action key sends, so a line can be typed and sent
+            //    without looking away from the keyboard. It sends **with** Enter, because that is
+            //    what the key means everywhere else; "Send" without it is the button below.
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = { send(true) }),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        )
+        Text(stringResource(R.string.settings_send_text_hint),
+            style = MaterialTheme.typography.bodySmall)
+        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Button(onClick = { send(false) }, enabled = text.isNotEmpty()) {
+                Text(stringResource(R.string.settings_send))
+            }
+            Button(onClick = { send(true) }, enabled = text.isNotEmpty()) {
+                Text(stringResource(R.string.settings_send_enter))
+            }
+            // 🔑 Enter on its own, with the field empty: the remote is showing a dialog that only
+            //    needs confirming, and the panel's ↵ button is behind this sheet.
+            TextButton(onClick = { onSend("", true) }) {
+                Text(stringResource(R.string.settings_enter_only))
+            }
         }
     }
 }

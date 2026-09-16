@@ -83,6 +83,18 @@ which lives in untracked `local.properties` precisely so it is not written down.
 The lesson is about *whose* machine the evidence came from: a default that is convenient for the
 person developing can stand in for a feature that was never written.
 
+## 6. A test file full of raw control characters walked past the publication gate
+
+The typing tests need a NUL, a BEL and a DEL as *data* - they are what "control characters are
+dropped" means. Written as the bytes themselves, git classifies the file as **binary**, and
+`check-private-info.sh` greps with `-I`, which **skips binary files**. That file would then be
+exempt from the private-information and Korean checks for good, and the gate would still print
+`✅ clean`.
+
+🔑 Same shape as the others on this page: the instrument reports success while measuring nothing.
+The rule is one line - **in this repository a control character in source is always a `\u`
+escape**, never the byte.
+
 ---
 
 ## The pattern
