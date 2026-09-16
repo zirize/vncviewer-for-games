@@ -1,0 +1,1 @@
+package awtx.image; public class Raster { public DataBuffer getDataBuffer() {return new DataBuffer();} public static Raster createRaster(SampleModel sm, DataBuffer db, awtx.Point p) {return null;} public int[] getPixels(int x, int y, int w, int h, int[] p) {return null;} }

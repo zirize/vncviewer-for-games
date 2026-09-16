@@ -1,0 +1,130 @@
+vncviewer-for-games
+Copyright (C) 2026 Bill Kang
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.  The full text is in LICENSE.
+
+WHY GPL AND NOT SOMETHING ELSE
+------------------------------
+This is not a choice that was available.  The program is built on the TigerVNC
+Java viewer, which is GPL-2.0-or-later, so the combined work is too.
+
+The components below are under their own licenses.  All of them are compatible
+with GPL-2.0-or-later, so the combined work is distributed under that single
+license -- but their notices may not be removed.  That is what this file is for.
+
+
+1. TigerVNC Java viewer -- GPL-2.0-or-later
+------------------------------------------
+    Source:  https://github.com/TigerVNC/tigervnc
+    In tree: app/src/main/java/com/tigervnc/**  (84 files)
+    Upstream revision: NOT RECORDED.  Copyright years in the headers run to
+    2026, so it is a recent master snapshot rather than a tagged release.
+
+    Copyright (C) 1999 AT&T Laboratories Cambridge
+    Copyright (C) 2000-2003 Constantin Kaplinsky
+    Copyright (C) 2002-2005 RealVNC Ltd.
+    Copyright (C) 2004 Red Hat Inc.
+    Copyright (C) 2005 Martin Koegler
+    Copyright (C) 2010, 2026 TigerVNC Team
+    Copyright (C) 2011-2026 Brian P. Hinz
+    Copyright (C) 2011-2026 D. R. Commander
+    Copyright (C) 2017 Pierre Ossman for Cendio AB
+    Copyright (C) 2022 Dinglan Peng
+
+    MODIFIED FILES.  GPL-2.0 section 2(a) requires modified files to say so.
+    The following carry a change notice in their header:
+
+        network/SocketDescriptor.java     rfb/PixelBuffer.java
+        rdr/FdInStream.java               rfb/Region.java
+        rfb/CConnection.java              rfb/Security.java
+        rfb/DecodeManager.java            rfb/TightDecoder.java
+
+    HEADERS LOST AND RESTORED.  Three files were rewritten heavily enough that
+    their upstream header went missing.  Upstream carries files of the same
+    name, so they are treated as derived from TigerVNC and the GPL-2.0-or-later
+    header has been put back, together with a change notice:
+
+        rfb/CSecurityVncAuth.java
+        rfb/JpegDecompressor.java
+        rfb/SecurityClient.java
+
+    (DesCipher.java is also header-less upstream in the sense that it carries
+    its own, different notice -- see section 2.  It is left exactly as is.)
+
+
+2. DesCipher.java -- permissive (Widget Workshop)
+-------------------------------------------------
+    In tree: app/src/main/java/com/tigervnc/rfb/DesCipher.java
+
+    Copyright (c) 1996 Widget Workshop, Inc.  All Rights Reserved.
+    Copyright (C) 1999 AT&T Laboratories Cambridge.  All Rights Reserved.
+
+    Permission to use, copy, modify, and distribute this software and its
+    documentation for NON-COMMERCIAL or COMMERCIAL purposes and without fee is
+    hereby granted, provided that this copyright notice is kept intact.
+
+    The full notice, including the warranty disclaimer and the high-risk-
+    activity disclaimer, is at the top of the file.  Keeping it intact is a
+    condition of the license, so do not strip that header.
+
+
+3. (removed) TLS support -- was LGPL-2.1-or-later
+-------------------------------------------------
+    This project used to carry SSLEngineManager.java (LGPL-2.1-or-later, by
+    Brian P. Hinz and D. R. Commander) together with rdr/TLSInStream.java,
+    rdr/TLSOutStream.java and rdr/TLSException.java.
+
+    They were dead code: SecurityClient offers only None and VncAuth, so no TLS
+    security type is ever negotiated and nothing ever reached them.  They have
+    been deleted, and with them the only LGPL-licensed file in the project.
+
+    If TLS is ever added back, take the files from upstream TigerVNC again and
+    restore an LGPL-2.1 notice here along with the license text.
+
+    (The TLS/VeNCrypt constants that remain in rfb/Security.java are just RFB
+    protocol numbers, not an implementation.)
+
+
+4. libjpeg-turbo -- IJG License AND BSD-3-Clause (plus zlib, BSD-2-Clause)
+--------------------------------------------------------------------------
+    Source:   https://github.com/libjpeg-turbo/libjpeg-turbo
+    Revision: 7b5fee3f7a83b5c2bdbb52d5dd6ce6bfc53b6b58
+              = 3.2.0-29-g7b5fee3, dated 2026-09-11.  A master snapshot, not a
+              tagged release.  (The ChangeLog's "3.2.1" section is the
+              in-development one; 3.2.1 was not released at this revision.)
+    In tree:  app/src/main/cpp/libjpeg-turbo/  -- a git SUBMODULE, so the code
+              is fetched from upstream, not redistributed here.
+
+        git submodule update --init --recursive
+
+    License text: app/src/main/cpp/libjpeg-turbo/LICENSE.md  (in the submodule)
+    IJG readme:   app/src/main/cpp/libjpeg-turbo/README.ijg  (in the submodule)
+
+    The IJG License requires that README.ijg be included in the distribution
+    and that its text not be altered.  Both ship inside the submodule at the
+    pinned revision; do not remove them.
+
+    NOT ONE BYTE IS CHANGED.  The submodule is pinned to a pristine upstream
+    commit and carries no patch.  An earlier version of this project patched
+    libjpeg-turbo's CMakeLists.txt to defeat its deliberate block on
+    add_subdirectory() integration; that made a submodule impossible, because
+    a fresh clone would get clean upstream and fail to build.  The build now
+    uses ExternalProject_Add() instead, which is what upstream tells downstream
+    projects to do.  See app/src/main/cpp/CMakeLists.txt.
+
+
+5. Gradle wrapper -- Apache-2.0
+-------------------------------
+    In tree: gradle/wrapper/gradle-wrapper.jar
+    Copyright (C) Gradle, Inc.
+
+
+6. Build-time dependencies -- Apache-2.0 (not redistributed in this repository)
+-------------------------------------------------------------------------------
+    AndroidX, Jetpack Compose and the Android Gradle Plugin are fetched by
+    Gradle at build time and are not part of this source tree.  They end up in
+    the built APK, which is why they are listed here.
+    Copyright (C) The Android Open Source Project.

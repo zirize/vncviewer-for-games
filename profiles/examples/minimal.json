@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "id": "minimal",
+  "name": "Minimal",
+  "origin": "builtin",
+
+  "_comment": [
+    "Almost nothing: move, confirm, back out, and the way into settings.",
+    "Useful as a starting point when someone wants to build up from empty rather",
+    "than cut the default down.",
+    "The settings button is the floor. A profile without it cannot be built."
+  ],
+
+  "authoredForMarginPx": 240,
+  "authoredForHeightPx": 1080,
+  "cornerRadiusPx": 20,
+
+  "buttons": [
+    { "id": "dpad",     "label": null,     "shape": "dpad",    "panel": "left",  "anchor": "top",
+      "x": 2,  "y": 400, "w": 236, "h": 295,
+      "action": { "type": "dpad", "up": "Up", "down": "Down", "left": "Left", "right": "Right" } },
+
+    { "id": "settings", "label": null,     "shape": "icon",    "panel": "left",  "anchor": "bottom",
+      "x": 5,  "y": 5,   "w": 107, "h": 96,
+      "action": { "type": "ui", "command": "settings" } },
+
+    { "id": "enter",    "label": "↵", "shape": "circle",  "panel": "right", "anchor": "top",
+      "x": 41, "y": 40,  "w": 116, "h": 116,
+      "action": { "type": "key", "keysym": "Return", "behavior": "tap" } },
+
+    { "id": "esc",      "label": "ESC",    "shape": "rounded", "panel": "right", "anchor": "top",
+      "x": 41, "y": 200, "w": 105, "h": 56,
+      "action": { "type": "key", "keysym": "Escape", "behavior": "tap" } }
+  ]
+}

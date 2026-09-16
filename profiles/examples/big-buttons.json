@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "id": "big-buttons",
+  "name": "Big buttons",
+  "origin": "builtin",
+
+  "_comment": [
+    "For someone who finds the default too small or too fiddly.",
+    "The trade is not negotiable: the margin is 240 authored px, so two columns of",
+    "114px buttons already fill it. Making buttons big means ONE column, which means",
+    "fewer buttons. This profile keeps six and drops the D-pad, the wheel and the",
+    "spare letter keys.",
+    "Note the settings button is still here. It always has to be."
+  ],
+
+  "authoredForMarginPx": 240,
+  "authoredForHeightPx": 1080,
+  "cornerRadiusPx": 20,
+
+  "buttons": [
+    { "id": "pageup",   "label": "▲", "shape": "rounded", "panel": "left",  "anchor": "top",
+      "x": 20, "y": 40,  "w": 200, "h": 200,
+      "action": { "type": "key", "keysym": "PageUp", "behavior": "tap" } },
+
+    { "id": "pagedown", "label": "▼", "shape": "rounded", "panel": "left",  "anchor": "top",
+      "x": 20, "y": 270, "w": 200, "h": 200,
+      "action": { "type": "key", "keysym": "PageDown", "behavior": "tap" } },
+
+    { "id": "ctrl",     "label": "CTRL",   "shape": "rounded", "panel": "left",  "anchor": "top",
+      "x": 20, "y": 500, "w": 200, "h": 200,
+      "action": { "type": "key", "keysym": "ControlL", "behavior": "latch" } },
+
+    { "id": "settings", "label": null,     "shape": "icon",    "panel": "left",  "anchor": "bottom",
+      "x": 20, "y": 20,  "w": 200, "h": 120,
+      "action": { "type": "ui", "command": "settings" } },
+
+    { "id": "enter",    "label": "↵", "shape": "rounded", "panel": "right", "anchor": "top",
+      "x": 20, "y": 40,  "w": 200, "h": 200,
+      "action": { "type": "key", "keysym": "Return", "behavior": "tap" } },
+
+    { "id": "esc",      "label": "ESC",    "shape": "rounded", "panel": "right", "anchor": "top",
+      "x": 20, "y": 270, "w": 200, "h": 200,
+      "action": { "type": "key", "keysym": "Escape", "behavior": "tap" } },
+
+    { "id": "f",        "label": "F",      "shape": "circle",  "panel": "right", "anchor": "top",
+      "x": 20, "y": 500, "w": 200, "h": 200,
+      "action": { "type": "key", "keysym": "f", "behavior": "tap" } }
+  ]
+}

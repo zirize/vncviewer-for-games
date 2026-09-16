@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "id": "default",
+  "name": "Default",
+  "origin": "builtin",
+  "authoredForMarginPx": 240,
+  "authoredForHeightPx": 1080,
+  "cornerRadiusPx": 20,
+  "buttons": [
+    {
+      "id": "pageup",
+      "label": "▲",
+      "shape": "rounded",
+      "panel": "left",
+      "anchor": "top",
+      "x": 0,
+      "y": 51,
+      "w": 114,
+      "h": 114,
+      "action": {
+        "type": "key",
+        "keysym": "PageUp",
+        "behavior": "tap"
+      }
+    },
+    {
+      "id": "pagedown",
+      "label": "▼",
+      "shape": "rounded",
+      "panel": "left",
+      "anchor": "top",
+      "x": 0,
+      "y": 187,
+      "w": 114,
+      "h": 114,
+      "action": {
+        "type": "key",
+        "keysym": "PageDown",
+        "behavior": "tap"
+      }
+    },
+    {
+      "id": "h",
+      "label": "H",
+      "shape": "circle",
+      "panel": "left",
+      "anchor": "top",
+      "x": 126,
+      "y": 50,
+      "w": 114,
+      "h": 114,
+      "action": {
+        "type": "key",
+        "keysym": "h",
+        "behavior": "tap"
+      }
+    },
+    {
+      "id": "ctrl",
+      "label": "CTRL",
+      "shape": "circle",
+      "panel": "left",
+      "anchor": "top",
+      "x": 126,
+      "y": 187,
+      "w": 114,
+      "h": 114,
+      "action": {
+        "type": "key",
+        "keysym": "ControlL",
+        "behavior": "latch"
+      }
+    },
+    {
+      "id": "enter",
+      "label": "↵",
+      "shape": "circle",
+      "panel": "left",
+      "anchor": "top",
+      "x": 126,
+      "y": 323,
+      "w": 114,
+      "h": 114,
+      "action": {
+        "type": "key",
+        "keysym": "Enter",
+        "behavior": "tap"
+      }
+    },
+    {
+      "id": "dpad",
+      "label": null,
+      "shape": "dpad",
+      "panel": "left",
+      "anchor": "top",
+      "x": 2,
+      "y": 470,
+      "w": 236,
+      "h": 295,
+      "action": {
+        "type": "dpad",
+        "up": "Up",
+        "down": "Down",
+        "left": "Left",
+        "right": "Right"
+      }
+    },
+    {
+      "id": "settings",
+      "label": null,
+      "shape": "icon",
+      "panel": "left",
+      "anchor": "bottom",
+      "x": 5,
+      "y": 5,
+      "w": 107,
+      "h": 96,
+      "action": {
+        "type": "ui",
+        "command": "settings"
+      }
+    },
+    {
+      "id": "mwup",
+      "label": "MWUP",
+      "shape": "mouse",
+      "panel": "right",
+      "anchor": "top",
+      "x": 41,
+      "y": 35,
+      "w": 115,
+      "h": 114,
+      "action": {
+        "type": "wheel",
+        "direction": "up",
+        "clicks": 1
+      }
+    },
+    {
+      "id": "mwdn",
+      "label": "MWDN",
+      "shape": "mouse",
+      "panel": "right",
+      "anchor": "top",
+      "x": 41,
+      "y": 227,
+      "w": 115,
+      "h": 114,
+      "action": {
+        "type": "wheel",
+        "direction": "down",
+        "clicks": 1
+      }
+    },
+    {
+      "id": "esc",
+      "label": "ESC",
+      "shape": "pill",
+      "panel": "right",
+      "anchor": "top",
+      "x": 41,
+      "y": 404,
+      "w": 105,
+      "h": 56,
+      "action": {
+        "type": "key",
+        "keysym": "Escape",
+        "behavior": "tap"
+      }
+    },
+    {
+      "id": "f",
+      "label": "F",
+      "shape": "circle",
+      "panel": "right",
+      "anchor": "bottom",
+      "x": 41,
+      "y": 191,
+      "w": 116,
+      "h": 116,
+      "action": {
+        "type": "key",
+        "keysym": "f",
+        "behavior": "tap"
+      }
+    },
+    {
+      "id": "v",
+      "label": "V",
+      "shape": "circle",
+      "panel": "right",
+      "anchor": "bottom",
+      "x": 41,
+      "y": 23,
+      "w": 116,
+      "h": 116,
+      "action": {
+        "type": "key",
+        "keysym": "v",
+        "behavior": "tap"
+      }
+    }
+  ],
+  "_broken_on_purpose": "shape is 'pill' (no such shape) and keysym is 'Enter' (the constant is called Return)."
+}

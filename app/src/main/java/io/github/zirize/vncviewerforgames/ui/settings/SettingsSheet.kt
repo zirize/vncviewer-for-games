@@ -1,0 +1,304 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright (C) 2026 Bill Kang
+
+package io.github.zirize.vncviewerforgames.ui.settings
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import io.github.zirize.vncviewerforgames.R
+import io.github.zirize.vncviewerforgames.VncSurfaceView
+import io.github.zirize.vncviewerforgames.input.PointerMode
+import kotlin.math.roundToInt
+
+/**
+ * The settings sheet. The way in is the **bottom-left `⋯` button**.
+ *
+ * 🔴 **Opening it calls [VncSurfaceView.releaseAllInput].** That entry point shares a panel with
+ * the `CTRL` latch button, so they are a finger's width apart: it is easy to walk in here with
+ * CTRL still armed, and then CTRL stays down in the game while the user is looking at this screen —
+ * **nothing anywhere says so.**
+ *
+ * 🔑 **What you need in a hurry is at the top.** This opens mid-game; twenty-seven controls in a
+ * flat list would be unusable.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsSheet(view: VncSurfaceView, onDismiss: () -> Unit) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // 🔑 The sheet has to show the *current* values, so they are read once on open and held in Compose state.
+    var tick by remember { mutableStateOf(0) }
+    fun changed() { tick++ }
+
+    var confirming by remember { mutableStateOf<RiskyOption?>(null) }
+
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(
+            Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            @Suppress("UNUSED_EXPRESSION") tick   // the hook that redraws when a value changes
+
+            PendingBar(view, onReconnect = { view.retryConnection(); changed() })
+
+            // 🔑 **There is deliberately no disconnect or reconnect button here.**
+            //    (a) An ordinary failure retries by itself once a second, so there is nothing to press.
+            //    (b) To really disconnect, close the app.
+            //    (c) Changing a setting and reconnecting is already covered by the pending bar above.
+            //    🔴 Manual retry is only needed when automatic retry is *suppressed* (auth failure),
+            //       and that belongs where it happens, not in settings → the connection banner.
+            SectionTitle(stringResource(R.string.settings_section_quick),
+                stringResource(R.string.settings_applies_now))
+            SwitchRow(
+                stringResource(R.string.settings_trackpad_mode),
+                view.pointerConfig.mode == PointerMode.TRACKPAD,
+            ) { on ->
+                view.pointerConfig = view.pointerConfig.copy(
+                    mode = if (on) PointerMode.TRACKPAD else PointerMode.ABSOLUTE)
+                changed()
+            }
+            SwitchRow(stringResource(R.string.settings_two_finger_scroll), view.pointerConfig.twoFingerScroll) {
+                view.pointerConfig = view.pointerConfig.copy(twoFingerScroll = it); changed()
+            }
+            SwitchRow(stringResource(R.string.settings_long_press_right_click), view.pointerConfig.longPressRightClick) {
+                view.pointerConfig = view.pointerConfig.copy(longPressRightClick = it); changed()
+            }
+            // 🔑 Rarely used, so it sits at the bottom of the quick section.
+            SwitchRow(stringResource(R.string.settings_view_only), view.viewOnly) {
+                // Turning it on releases what is held first (inside the setter). Otherwise it stays down on the server forever.
+                view.viewOnly = it; changed()
+            }
+
+            SectionTitle(stringResource(R.string.settings_section_input),
+                stringResource(R.string.settings_applies_now))
+            SliderRow(stringResource(R.string.settings_cursor_sensitivity), view.pointerConfig.sensitivity, 0.25f, 5f) {
+                view.pointerConfig = view.pointerConfig.copy(sensitivity = it); changed()
+            }
+            SliderRow(stringResource(R.string.settings_scroll_sensitivity), view.pointerConfig.scrollSensitivity, 0.25f, 8f) {
+                view.pointerConfig = view.pointerConfig.copy(scrollSensitivity = it); changed()
+            }
+            SwitchRow(stringResource(R.string.settings_natural_scroll), view.pointerConfig.naturalScroll) {
+                view.pointerConfig = view.pointerConfig.copy(naturalScroll = it); changed()
+            }
+            // 🔑 Says what turning it off does, rather than using the word "latching".
+            SwitchRow(stringResource(R.string.settings_latch_ctrl),
+                view.keyConfig.latchEnabled) {
+                view.keyConfig = view.keyConfig.copy(latchEnabled = it); changed()
+            }
+            SliderRow(stringResource(R.string.settings_double_tap_ms), view.keyConfig.doubleTapMs.toFloat(), 150f, 600f, 0) {
+                view.keyConfig = view.keyConfig.copy(doubleTapMs = it.roundToInt().toLong()); changed()
+            }
+            SwitchRow(stringResource(R.string.settings_click_consumes_latch), view.keyConfig.mouseClickConsumesOneshot) {
+                view.keyConfig = view.keyConfig.copy(mouseClickConsumesOneshot = it); changed()
+            }
+
+            SectionTitle(stringResource(R.string.settings_section_connection),
+                stringResource(R.string.settings_applies_next_connection))
+            TextRow(stringResource(R.string.settings_host), view.connectionConfig.host) {
+                view.connectionConfig.host = it; changed()
+            }
+            TextRow(stringResource(R.string.settings_port), view.connectionConfig.port.toString()) {
+                it.toIntOrNull()?.let { p -> view.connectionConfig.port = p }; changed()
+            }
+            SwitchRow(stringResource(R.string.settings_shared), view.connectionConfig.shared) { on ->
+                if (!on) confirming = RiskyOption.SHARED_OFF
+                else { view.connectionConfig.shared = true; changed() }
+            }
+
+            SectionTitle(stringResource(R.string.settings_section_display),
+                stringResource(R.string.settings_applies_next_connection))
+            SliderRow(stringResource(R.string.settings_jpeg_quality, valueLabel(qualityLabelRes(view.connectionConfig.qualityLevel), view.connectionConfig.qualityLevel)),
+                view.connectionConfig.qualityLevel.toFloat(), -1f, 9f, 0) {
+                view.connectionConfig.qualityLevel = it.roundToInt(); changed()
+            }
+            // 🔑 Directly under quality, because the server ties the two together (q8 = 92 with
+            //    4:4:4). Seen apart, "I lowered the quality, why did the colour go too?" is
+            //    unanswerable.
+            ChoiceRow(
+                stringResource(R.string.settings_chroma, valueLabel(subsamplingLabelRes(view.connectionConfig.subsampling), view.connectionConfig.subsampling)),
+                SUBSAMPLING_CHOICES, view.connectionConfig.subsampling,
+            ) { view.connectionConfig.subsampling = it; changed() }
+            SliderRow(stringResource(R.string.settings_compression, valueLabel(compressLabelRes(view.connectionConfig.compressLevel), view.connectionConfig.compressLevel)),
+                view.connectionConfig.compressLevel.toFloat(), -1f, 9f, 0) {
+                view.connectionConfig.compressLevel = it.roundToInt(); changed()
+            }
+            SwitchRow(stringResource(R.string.settings_clipboard), view.connectionConfig.clipboard) { on ->
+                if (on) confirming = RiskyOption.CLIPBOARD_ON
+                else { view.connectionConfig.clipboard = false; changed() }
+            }
+            // 🔑 No longer a dangerous option: the app draws the cursor itself (2026-09-16).
+            //    Turn it off and the server composites it into the framebuffer, so the cursor
+            //    waits for frames again.
+            SwitchRow(stringResource(R.string.settings_cursor_shape),
+                view.connectionConfig.cursorShape) { on ->
+                view.connectionConfig.cursorShape = on; changed()
+            }
+        }
+    }
+
+    confirming?.let { opt ->
+        AlertDialog(
+            onDismissRequest = { confirming = null },
+            title = { Text(stringResource(opt.title)) },
+            text = { Text(stringResource(opt.why)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    when (opt) {
+                        RiskyOption.SHARED_OFF -> view.connectionConfig.shared = false
+                        RiskyOption.CLIPBOARD_ON -> view.connectionConfig.clipboard = true
+                    }
+                    confirming = null; changed()
+                }) { Text(stringResource(R.string.settings_enable_anyway)) }
+            },
+            dismissButton = { TextButton(onClick = { confirming = null }) { Text(stringResource(R.string.settings_cancel)) } },
+        )
+    }
+}
+
+/**
+ * 🔴 **A count, not a sentence** — with nothing pending it is not drawn at all.
+ * Showing "applies from the next connection" permanently does not work: people read it and still
+ * believe the change took effect now.
+ */
+@Composable
+private fun PendingBar(view: VncSurfaceView, onReconnect: () -> Unit) {
+    val pending = PendingChanges.of(view.connectionConfig, view.connectedConfig)
+    if (pending.isEmpty) return
+    Card(
+        Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.settings_pending, pending.count),
+                    style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                // 🔑 `stringResource` is a @Composable call and cannot be used inside an
+                //    ordinary lambda, so the names are resolved through the context instead.
+                val res = LocalContext.current.resources
+                Text(pending.keys.joinToString(" · ") { key ->
+                    SettingLabels.of(key)?.let { res.getString(it) } ?: key
+                }, style = MaterialTheme.typography.bodySmall)
+            }
+            Button(onClick = onReconnect) { Text(stringResource(R.string.settings_reconnect_now)) }
+        }
+    }
+}
+
+@Composable
+private fun SectionTitle(title: String, badge: String) {
+    HorizontalDivider(Modifier.padding(top = 16.dp))
+    Row(Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        // 🔑 When things apply is stated once per section; per row, nobody reads it.
+        Text(badge, style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary)
+    }
+}
+
+@Composable
+private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        Switch(checked = checked, onCheckedChange = onChange)
+    }
+}
+
+/**
+ * 🔑 **A slider's range must match what the view actually accepts.** If it does not, the value
+ * gets silently clamped and the user has no idea why it did not take.
+ */
+@Composable
+private fun SliderRow(
+    label: String, value: Float, min: Float, max: Float,
+    decimals: Int = 2, onChange: (Float) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+        Text(if (decimals == 0) label else "$label — ${"%.2f".format(value)}",
+            style = MaterialTheme.typography.bodyMedium)
+        Slider(value = value.coerceIn(min, max), onValueChange = onChange, valueRange = min..max)
+    }
+}
+
+/**
+ * A row for picking a value that has **no natural ordering**.
+ *
+ * 🔴 **Subsampling must not be a slider.** The constants are 0 = 4:4:4, 1 = 4:2:0, 2 = 4:2:2, so
+ * numeric order and quality order **disagree**. As a slider it would read as "further right is
+ * better", which is false.
+ */
+@Composable
+private fun ChoiceRow(
+    label: String, choices: List<Triple<Int, Int, String>>, selected: Int, onChange: (Int) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+        Text(label, style = MaterialTheme.typography.bodyMedium)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            choices.forEach { (value, labelRes, literal) ->
+                val short = if (labelRes != 0) stringResource(labelRes) else literal
+                if (value == selected)
+                    Button(onClick = { onChange(value) }) { Text(short) }
+                else
+                    TextButton(onClick = { onChange(value) }) { Text(short) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TextRow(label: String, value: String, onChange: (String) -> Unit) {
+    var text by remember(value) { mutableStateOf(value) }
+    OutlinedTextField(
+        value = text,
+        onValueChange = { text = it; onChange(it) },
+        label = { Text(label) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+    )
+}
+
+/**
+ * Resolves a value label: a resource id when there is one, otherwise the bare number.
+ *
+ * 🔑 Some values have no wording worth translating — a JPEG quality of 5 is just "5". Returning 0
+ * from the label functions means exactly that, and this is the one place that decides what to do
+ * about it.
+ */
+@Composable
+private fun valueLabel(labelRes: Int, value: Int): String =
+    if (labelRes != 0) stringResource(labelRes, value) else value.toString()

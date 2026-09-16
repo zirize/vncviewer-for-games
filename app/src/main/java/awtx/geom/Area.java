@@ -1,0 +1,1 @@
+package awtx.geom; public class Area { public Area(){} public Area(awtx.Rectangle r){} public Area(Area a){} public void transform(AffineTransform t){} public void reset(){} public void intersect(Area a){} public void add(Area a){} public void subtract(Area a){} public boolean isEmpty(){return true;} public awtx.Rectangle getBounds(){return null;} }

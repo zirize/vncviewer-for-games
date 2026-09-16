@@ -1,0 +1,100 @@
+<resources>
+    <!--
+      Default (English) UI strings.
+
+      app_name is NOT here on purpose: it is generated in app/build.gradle.kts by the same rule
+      that decides applicationId, so that a fork does not ship something called RemotePad.
+
+      Korean translations live in res/values-ko/. Source and documentation in this repository are
+      English only; keeping the Korean here rather than in the code is what lets both be true.
+    -->
+
+    <!-- ── Connection banner ───────────────────────────────────────── -->
+    <string name="conn_connecting">Connecting…</string>
+    <string name="conn_retrying">Disconnected — retrying…</string>
+    <string name="conn_failed">Connection failed</string>
+    <string name="conn_stale_picture">This is the last picture received</string>
+    <string name="conn_retry">Retry</string>
+
+    <!-- ── Settings: sections ──────────────────────────────────────── -->
+    <string name="settings_section_quick">Quick settings</string>
+    <string name="settings_section_input">Input</string>
+    <string name="settings_section_connection">Connection</string>
+    <string name="settings_section_display">Display and performance</string>
+    <string name="settings_applies_now">applies immediately</string>
+    <string name="settings_applies_next_connection">from the next connection</string>
+
+    <!-- ── Settings: quick ─────────────────────────────────────────── -->
+    <string name="settings_trackpad_mode">Trackpad mode (off = cursor jumps to where you touch)</string>
+    <string name="settings_two_finger_scroll">Two-finger scroll</string>
+    <string name="settings_long_press_right_click">Long press for right click</string>
+    <string name="settings_view_only">View only — sends no input at all</string>
+
+    <!-- ── Settings: input ─────────────────────────────────────────── -->
+    <string name="settings_cursor_sensitivity">Cursor sensitivity</string>
+    <string name="settings_scroll_sensitivity">Scroll sensitivity</string>
+    <string name="settings_natural_scroll">Reverse scroll direction (the macOS way)</string>
+    <string name="settings_latch_ctrl">Tap CTRL to arm it — off means held-only</string>
+    <string name="settings_double_tap_ms">Double-tap window (ms)</string>
+    <string name="settings_click_consumes_latch">A mouse click consumes the latch</string>
+
+    <!-- ── Settings: connection ────────────────────────────────────── -->
+    <string name="settings_host">Server address</string>
+    <string name="settings_port">Port</string>
+    <string name="settings_shared">Share the screen (off disconnects existing clients)</string>
+
+    <!-- ── Settings: display and performance ───────────────────────── -->
+    <string name="settings_jpeg_quality">JPEG quality — %1$s</string>
+    <string name="settings_chroma">Chroma resolution — %1$s</string>
+    <string name="settings_compression">Compression level — %1$s</string>
+    <string name="settings_clipboard">Extended clipboard</string>
+    <string name="settings_cursor_shape">Send cursor shape (off makes the cursor wait for frames)</string>
+
+    <!-- ── Settings: pending / dialogs ─────────────────────────────── -->
+    <string name="settings_pending">%1$d setting(s) will apply from the next connection</string>
+    <string name="settings_reconnect_now">Reconnect now</string>
+    <string name="settings_enable_anyway">Enable anyway</string>
+    <string name="settings_cancel">Cancel</string>
+
+    <!-- ── Setting names, used by the pending bar ──────────────────── -->
+    <string name="label_host">Server address</string>
+    <string name="label_port">Port</string>
+    <string name="label_shared">Screen sharing</string>
+    <string name="label_security_types">Security type</string>
+    <string name="label_password">Password</string>
+    <string name="label_encodings">Encoding preference</string>
+    <string name="label_compress_level">Compression level</string>
+    <string name="label_quality_level">JPEG quality</string>
+    <string name="label_subsampling">Chroma resolution</string>
+    <string name="label_pixel_format">Pixel format</string>
+    <string name="label_continuous_updates">Continuous updates</string>
+    <string name="label_desktop_resize">Follow resolution changes</string>
+    <string name="label_cursor_shape">Send cursor shape</string>
+    <string name="label_clipboard">Extended clipboard</string>
+
+    <!-- ── Risky options: asked about before turning on ────────────── -->
+    <string name="risky_shared_off_title">Turn screen sharing off</string>
+    <string name="risky_shared_off_why">The server will disconnect existing clients. Whoever was watching loses their session.</string>
+    <string name="risky_clipboard_on_title">Turn the extended clipboard on</string>
+    <string name="risky_clipboard_on_why">This has hung x11vnc-family servers before. If it hangs, you cannot fix it from this app.</string>
+
+    <!-- ── Value labels ────────────────────────────────────────────── -->
+    <string name="quality_off">Off — the server will not use JPEG (lossless, roughly 4x the bandwidth)</string>
+    <string name="quality_high">%1$d (high quality)</string>
+    <string name="quality_low">%1$d (low quality)</string>
+
+    <string name="chroma_auto_long">Automatic — the app moves between 4:2:0 and 4:4:4 during the session, from the measured load (default)</string>
+    <string name="chroma_server_long">Server decides — follows the quality setting</string>
+    <string name="chroma_444_long">4:4:4 — no colour loss (largest)</string>
+    <string name="chroma_422_long">4:2:2 — half the colour horizontally (sharpness unchanged)</string>
+    <string name="chroma_420_long">4:2:0 — half the colour both ways (smallest)</string>
+    <string name="chroma_mono_long">Greyscale — colour discarded entirely</string>
+
+    <string name="chroma_auto">Auto</string>
+    <string name="chroma_server">Server</string>
+    <string name="chroma_mono">Grey</string>
+
+    <string name="compress_default">Not requested (server default)</string>
+    <string name="compress_none">0 — no compression (fast, large)</string>
+    <string name="compress_max">9 — maximum compression (small, but costs CPU to unpack)</string>
+</resources>

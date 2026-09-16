@@ -1,0 +1,91 @@
+# vncviewer-for-games
+
+An Android VNC client for **playing games** on a remote desktop — not for desk work.
+
+![The on-screen controls over a remote desktop](docs/images/overlay.png)
+
+Every VNC viewer already out there is built for administering machines: small text, precise
+pointing, a keyboard you summon when you need it. Play a game through one and you spend the
+whole time fighting the client. This one is the other shape: **large touch buttons that are
+always there**, modifiers that latch so you are not holding two fingers down, a D-pad, and a
+wheel — arranged in the black margins beside the remote screen so they cost you no picture.
+
+The button layout is **data, not code**. It lives in [`profiles/default.json`](profiles/default.json),
+and you can regenerate it for whoever is going to hold the phone.
+
+> **Two names, one codebase.** The project is `vncviewer-for-games`. The build published on
+> Google Play is called **RemotePad** (`tech.doldam.remotepad`). They are the same source; only
+> the application id differs, so a fork can never overwrite the published app. See
+> [`app/build.gradle.kts`](app/build.gradle.kts).
+
+## What it does
+
+- **On-screen controls in the margins.** Page Up / Page Down, Ctrl, Enter, Esc, a D-pad, mouse
+  wheel up/down, and free letter keys. Drawn on a 60%-black background with a white outline so
+  they stay readable over a bright screen; anywhere that is not a button passes straight through
+  to the trackpad.
+- **Latching modifiers.** Tap Ctrl for one-shot, tap twice to lock. You do not need a second hand.
+- **Trackpad or absolute pointing.** Long-press for right click, two-finger scroll.
+- **Tight/JPEG decoding on four worker threads**, through libjpeg-turbo with NEON.
+- **A settings sheet that opens itself** if the very first connection fails, so a fresh install
+  is never a dead end.
+
+## Build
+
+You need JDK 17 and an Android SDK with NDK. Then:
+
+```bash
+git clone --recursive https://github.com/zirize/vncviewer-for-games.git
+cd vncviewer-for-games
+bash scripts/doctor.sh          # checks the toolchain; changes nothing
+bash scripts/build.sh           # release APK
+bash scripts/build.sh install   # ...and push it to a connected device
+```
+
+`--recursive` matters: libjpeg-turbo is a submodule. If you already cloned without it,
+`git submodule update --init --recursive`.
+
+If `doctor.sh` cannot find your JDK or SDK, add your path to `scripts/_hostenv.sh` — that file is
+the single place host-specific paths are allowed to live.
+
+> Release builds are signed with a debug key unless a `keystore.properties` exists. Use release
+> builds for everyday work: debug builds are visibly slower, because `debuggable` makes ART give
+> up optimisations (measured: 20.8 fps vs 33.2 fps on a full-motion test).
+
+## Make it fit your hands
+
+```bash
+cp profiles/default.json profiles/mine.json
+$EDITOR profiles/mine.json
+./gradlew :app:previewProfiles                        # validate + draw an SVG of the result
+./gradlew :app:assembleRelease -PvncProfile=mine.json  # build with it
+```
+
+The format is documented in [`docs/layout-profile.md`](docs/layout-profile.md), and
+[`docs/make-a-variant.md`](docs/make-a-variant.md) is a step-by-step recipe with what to do when
+each step fails.
+
+**You do not need the device to check your work.** Validation and the SVG preview both run on a
+plain JVM. That is deliberate — see below.
+
+## This repository expects to be read by agents
+
+Most of the time the person who wants a different layout will not edit the JSON themselves; they
+will ask a coding agent to do it. So the repository is built to let an agent **prove it got it
+right** without hardware:
+
+- `./gradlew :app:previewProfiles` validates every profile and renders each one to
+  `app/build/preview/<id>.svg`.
+- Deliberately broken profiles live in `app/src/test/resources/broken-profiles/` and are part of
+  the test suite, so the checks themselves are checked.
+- [`AGENTS.md`](AGENTS.md) is the entry point, including the things an agent must refuse.
+
+The single most important rule: **a layout must keep a way into settings.** Remove that button and
+the person holding the phone can no longer change anything — the validator rejects it.
+
+## Licence
+
+GPL-2.0-or-later. This is not a preference: the viewer is built on the
+[TigerVNC](https://github.com/TigerVNC/tigervnc) Java client, which is GPL-2.0-or-later, so the
+combined work is too. Full text in [`LICENSE`](LICENSE); third-party components and their notices
+are in [`NOTICE`](NOTICE).

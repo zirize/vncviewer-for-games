@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "id": "default",
+  "name": "Default",
+  "origin": "builtin",
+
+  "_comment_units": [
+    "Coordinates are AUTHORED PIXELS, not dp.",
+    "The spec doc (docs/design-specs/2026-09-15-keymap-schema.md) writes dp, but dp",
+    "cannot reproduce this layout exactly: 114px / 2.625 = 43.43dp, and 43dp back",
+    "is 112.875px. Rounding through dp shifts every button by a pixel or two.",
+    "Pixels are also what the layout code already scales with, so this stays faithful.",
+    "authoredForMarginPx is the panel width these coordinates assume; the whole panel",
+    "is scaled by (real panel width / this) so spacing never breaks."
+  ],
+  "authoredForMarginPx": 240,
+  "authoredForHeightPx": 1080,
+  "cornerRadiusPx": 20,
+
+  "_comment_label_vs_keysym": [
+    "label is what is DRAWN. keysym is what is SENT. They are not the same thing.",
+    "A button labelled F must send lowercase 'f' (0x66): in X11 an uppercase F is",
+    "'F with Shift held', and a game's F key is the lowercase one.",
+    "Get this wrong and nothing looks broken - the screen is fine and only the game",
+    "stops responding. Same for H and V."
+  ],
+
+  "buttons": [
+    { "id": "pageup",   "label": "▲", "shape": "rounded", "panel": "left",  "anchor": "top",
+      "x": 0,   "y": 51,  "w": 114, "h": 114,
+      "action": { "type": "key", "keysym": "PageUp", "behavior": "tap" } },
+
+    { "id": "pagedown", "label": "▼", "shape": "rounded", "panel": "left",  "anchor": "top",
+      "x": 0,   "y": 187, "w": 114, "h": 114,
+      "action": { "type": "key", "keysym": "PageDown", "behavior": "tap" } },
+
+    { "id": "h",        "label": "H",      "shape": "circle",  "panel": "left",  "anchor": "top",
+      "x": 126, "y": 50,  "w": 114, "h": 114,
+      "action": { "type": "key", "keysym": "h", "behavior": "tap" } },
+
+    { "id": "ctrl",     "label": "CTRL",   "shape": "circle",  "panel": "left",  "anchor": "top",
+      "x": 126, "y": 187, "w": 114, "h": 114,
+      "action": { "type": "key", "keysym": "ControlL", "behavior": "latch" } },
+
+    { "id": "enter",    "label": "↵", "shape": "circle",  "panel": "left",  "anchor": "top",
+      "x": 126, "y": 323, "w": 114, "h": 114,
+      "action": { "type": "key", "keysym": "Return", "behavior": "tap" } },
+
+    { "id": "dpad",     "label": null,     "shape": "dpad",    "panel": "left",  "anchor": "top",
+      "x": 2,   "y": 470, "w": 236, "h": 295,
+      "action": { "type": "dpad", "up": "Up", "down": "Down", "left": "Left", "right": "Right" } },
+
+    { "_comment": "THE ONLY WAY INTO SETTINGS. Removing this locks the user out of their own app - a profile test refuses it.",
+      "id": "settings", "label": null,     "shape": "icon",    "panel": "left",  "anchor": "bottom",
+      "x": 5,   "y": 5,   "w": 107, "h": 96,
+      "action": { "type": "ui", "command": "settings" } },
+
+    { "id": "mwup",     "label": "MWUP",   "shape": "mouse",   "panel": "right", "anchor": "top",
+      "x": 41,  "y": 35,  "w": 115, "h": 114,
+      "action": { "type": "wheel", "direction": "up", "clicks": 1 } },
+
+    { "id": "mwdn",     "label": "MWDN",   "shape": "mouse",   "panel": "right", "anchor": "top",
+      "x": 41,  "y": 227, "w": 115, "h": 114,
+      "action": { "type": "wheel", "direction": "down", "clicks": 1 } },
+
+    { "id": "esc",      "label": "ESC",    "shape": "rounded", "panel": "right", "anchor": "top",
+      "x": 41,  "y": 404, "w": 105, "h": 56,
+      "action": { "type": "key", "keysym": "Escape", "behavior": "tap" } },
+
+    { "id": "f",        "label": "F",      "shape": "circle",  "panel": "right", "anchor": "bottom",
+      "x": 41,  "y": 191, "w": 116, "h": 116,
+      "action": { "type": "key", "keysym": "f", "behavior": "tap" } },
+
+    { "_comment": "V is the letter v, NOT a settings shortcut. An earlier note said otherwise and was wrong.",
+      "id": "v",        "label": "V",      "shape": "circle",  "panel": "right", "anchor": "bottom",
+      "x": 41,  "y": 23,  "w": 116, "h": 116,
+      "action": { "type": "key", "keysym": "v", "behavior": "tap" } }
+  ]
+}

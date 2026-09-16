@@ -1,0 +1,89 @@
+<resources>
+    <!--
+      Korean UI strings.
+
+      These are the originals: the app was written in Korean and this is the wording its users
+      actually know. The English in res/values/ is the translation, not the other way round — so
+      when the two disagree about what a setting *means*, this file is the one that was tested
+      against a real hand on a real device.
+    -->
+
+    <string name="conn_connecting">접속 중…</string>
+    <string name="conn_retrying">연결이 끊겼습니다 — 다시 시도 중…</string>
+    <string name="conn_failed">접속 실패</string>
+    <string name="conn_stale_picture">화면은 마지막으로 받은 그림입니다</string>
+    <string name="conn_retry">다시 시도</string>
+
+    <string name="settings_section_quick">빠른 설정</string>
+    <string name="settings_section_input">입력</string>
+    <string name="settings_section_connection">접속</string>
+    <string name="settings_section_display">화면·성능</string>
+    <string name="settings_applies_now">즉시 적용</string>
+    <string name="settings_applies_next_connection">다음 접속부터</string>
+
+    <string name="settings_trackpad_mode">트랙패드 모드 (끄면 닿은 자리로 커서 이동)</string>
+    <string name="settings_two_finger_scroll">두 손가락 스크롤</string>
+    <string name="settings_long_press_right_click">길게 눌러 우클릭</string>
+    <string name="settings_view_only">뷰어 온리 — 입력을 한 건도 안 보낸다</string>
+
+    <string name="settings_cursor_sensitivity">커서 감도</string>
+    <string name="settings_scroll_sensitivity">스크롤 감도</string>
+    <string name="settings_natural_scroll">스크롤 방향 뒤집기 (맥 방식)</string>
+    <string name="settings_latch_ctrl">CTRL 을 탭해서 걸어 두기 — 끄면 «누르고 있는 동안만»</string>
+    <string name="settings_double_tap_ms">더블탭 인식 시간 (ms)</string>
+    <string name="settings_click_consumes_latch">마우스 클릭이 래치를 소비한다</string>
+
+    <string name="settings_host">서버 주소</string>
+    <string name="settings_port">포트</string>
+    <string name="settings_shared">화면 공유 (끄면 기존 클라이언트가 끊긴다)</string>
+
+    <string name="settings_jpeg_quality">JPEG 화질 — %1$s</string>
+    <string name="settings_chroma">색 해상도 — %1$s</string>
+    <string name="settings_compression">압축 수준 — %1$s</string>
+    <string name="settings_clipboard">확장 클립보드</string>
+    <string name="settings_cursor_shape">커서 모양 전송 (끄면 커서가 프레임을 기다립니다)</string>
+
+    <string name="settings_pending">%1$d개 항목이 다음 접속부터 적용됩니다</string>
+    <string name="settings_reconnect_now">지금 재접속</string>
+    <string name="settings_enable_anyway">그래도 켠다</string>
+    <string name="settings_cancel">취소</string>
+
+    <string name="label_host">서버 주소</string>
+    <string name="label_port">포트</string>
+    <string name="label_shared">화면 공유</string>
+    <string name="label_security_types">보안 방식</string>
+    <string name="label_password">암호</string>
+    <string name="label_encodings">인코딩 선호 순서</string>
+    <string name="label_compress_level">압축 수준</string>
+    <string name="label_quality_level">JPEG 화질</string>
+    <string name="label_subsampling">색 해상도</string>
+    <string name="label_pixel_format">픽셀 포맷</string>
+    <string name="label_continuous_updates">연속 갱신</string>
+    <string name="label_desktop_resize">해상도 변경 따라가기</string>
+    <string name="label_cursor_shape">커서 모양 전송</string>
+    <string name="label_clipboard">확장 클립보드</string>
+
+    <string name="risky_shared_off_title">화면 공유를 끈다</string>
+    <string name="risky_shared_off_why">서버가 «기존 클라이언트를 끊습니다». 남이 보고 있던 화면이 끊깁니다.</string>
+    <string name="risky_clipboard_on_title">확장 클립보드를 켠다</string>
+    <string name="risky_clipboard_on_why">x11vnc 계열에서 «서버가 멈춘» 전력이 있습니다. 멈추면 이 앱에서는 못 고칩니다.</string>
+
+    <string name="quality_off">끔 — 서버가 JPEG 을 쓰지 않는다 (무손실 · 대역폭 약 4배)</string>
+    <string name="quality_high">%1$d (고화질)</string>
+    <string name="quality_low">%1$d (저화질)</string>
+
+    <string name="chroma_auto_long">자동 — 부하를 보고 앱이 «접속 중에» 4:2:0 ↔ 4:4:4 를 오간다 (기본값)</string>
+    <string name="chroma_server_long">서버에 맡김 — 화질 설정에 맞춰 서버가 정한다</string>
+    <string name="chroma_444_long">4:4:4 — 색 손실 없음 (바이트가 가장 크다)</string>
+    <string name="chroma_422_long">4:2:2 — 색을 «가로»로 절반 (선명도는 그대로)</string>
+    <string name="chroma_420_long">4:2:0 — 색을 «가로·세로» 절반 (바이트가 가장 작다)</string>
+    <string name="chroma_mono_long">흑백 — 색을 아예 버린다</string>
+
+    <string name="chroma_auto">자동</string>
+    <string name="chroma_server">서버</string>
+    <string name="chroma_mono">흑백</string>
+
+    <string name="compress_default">요청 안 함 (서버 기본값)</string>
+    <string name="compress_none">0 — 압축 안 함 (빠르지만 바이트가 크다)</string>
+    <string name="compress_max">9 — 최대 압축 (바이트는 작지만 푸는 데 CPU 를 쓴다)</string>
+</resources>
