@@ -37,7 +37,7 @@ file has to be looked at too.
 
 ```bash
 tools/bench/fullmotion_server.sh start      # a 30fps full-motion server
-./gradlew :app:assembleRelease && adb install -r app/build/outputs/apk/release/app-release.apk
+bash scripts/build.sh install
 adb shell am force-stop tech.doldam.remotepad
 adb shell monkey -p tech.doldam.remotepad -c android.intent.category.LAUNCHER 1
 timeout 35 adb logcat -s PERF:I             # about 30 seconds of summaries
@@ -215,7 +215,7 @@ control.
 🔑 Layouts live in **`profiles/`**, not in code. After changing one there are three checks.
 
 ```bash
-./gradlew :app:previewProfiles      # this one line does 1 and 2 together
+bash scripts/build.sh preview       # this one line does 1 and 2 together
 ```
 
 | | check | what it prevents |
@@ -242,7 +242,7 @@ respond.**
 **Building a different layout**
 
 ```bash
-./gradlew :app:assembleRelease -PvncProfile=lefty.json   # uses profiles/lefty.json
+bash scripts/build.sh release -PvncProfile=lefty.json   # uses profiles/lefty.json
 ```
 
 **Deliberately broken examples** — the five files in `app/src/test/resources/broken-profiles/` are

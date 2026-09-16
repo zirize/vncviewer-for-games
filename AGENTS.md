@@ -11,12 +11,17 @@ Read this file, then [`docs/make-a-variant.md`](docs/make-a-variant.md).
 ## 1. The one command
 
 ```bash
-./gradlew :app:previewProfiles
+bash scripts/build.sh preview
 ```
 
 It validates every profile in `profiles/` **and** draws each one to `app/build/preview/<id>.svg`.
 Both halves matter: the validator says whether the numbers are legal, the picture says whether the
 result is any good. They are one command on purpose — split into two and you will skip one.
+
+🔑 **Go through `scripts/build.sh`, not `./gradlew` directly.** The gradle wrapper needs `JAVA_HOME`,
+and on a host where the JDK lives inside the Android toolchain there is no system `java` to find —
+`./gradlew` dies with "JAVA_HOME is not set". `build.sh` resolves it first. Anything after the mode
+is passed straight through, so `bash scripts/build.sh release -PvncProfile=lefty.json` works.
 
 ---
 
@@ -34,7 +39,7 @@ not hypothetical; it happened here on 2026-09-16 and had to be reverted.
 
 Two things enforce it, because one was not enough:
 
-- the validator (`no-settings-exit`), via `./gradlew :app:previewProfiles`;
+- the validator (`no-settings-exit`), via `bash scripts/build.sh preview`;
 - **the build itself** — `checkSelectedProfile` runs before `preBuild` and refuses to produce an
   APK from a profile with no settings exit. That gate exists because `assembleRelease` does not run
   the tests, so anyone who forgot to validate could otherwise ship a locked-out build.
@@ -73,7 +78,7 @@ authored-pixel space.
 
 A change to a layout is finished when all of these are true:
 
-1. `./gradlew :app:previewProfiles` passes with no errors.
+1. `bash scripts/build.sh preview` passes with no errors.
 2. You have looked at `app/build/preview/<id>.svg` and it is what the person asked for.
 3. You can name what changed, in the person's words, not in coordinates
    ("the D-pad moved to the right panel", not "`panel` went from `left` to `right`").
@@ -108,7 +113,7 @@ That compares the preview against the real screen, and needs no SVG rasteriser.
 
 ## 5. Things that will waste your time
 
-- **`./gradlew :app:testDebugUnitTest` is fast and needs no device.** Run it. The overlay maths,
+- **`bash scripts/build.sh test` is fast and needs no device.** Run it. The overlay maths,
   the profile parser and the input model are all plain JVM code specifically so that it can be.
 - **Kotlin block comments nest.** Writing `profiles/` followed by `*.json` inside a comment opens a
   nested comment with `/*` and the file stops compiling with "Unclosed comment".

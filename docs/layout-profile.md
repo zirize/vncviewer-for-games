@@ -2,7 +2,7 @@
 
 A profile is one JSON file describing every on-screen button. `profiles/default.json` is the one
 that ships; anything else you drop in `profiles/` is built with
-`./gradlew :app:assembleRelease -PvncProfile=<name>.json`.
+`bash scripts/build.sh release -PvncProfile=<name>.json`.
 
 Parsed by `OverlayProfileParser` (plain JVM, no Android), checked by `OverlayProfileValidator`.
 
@@ -153,7 +153,7 @@ it by accident" instead of "something is wrong".
 | `latch-on-non-modifier` | ⚠️ downgraded to `tap` |
 | `tiny` | ⚠️ drawn too small to see |
 
-Run it with `./gradlew :app:previewProfiles`.
+Run it with `bash scripts/build.sh preview`.
 
 Separately, `checkSelectedProfile` runs as part of every build and refuses just one thing — a
 profile with no settings exit. It is deliberately narrow: that is the only mistake a user cannot

@@ -4,7 +4,14 @@
 #   bash scripts/build.sh debug      # debug APK  🔴 noticeably slower, see below
 #   bash scripts/build.sh aab        # store bundle plus a signature check
 #   bash scripts/build.sh test       # unit tests only, no device needed
+#   bash scripts/build.sh preview    # validate the profiles and render the SVG previews
 #   bash scripts/build.sh install    # release build, then push it to a device
+#
+# 🔑 **Always go through this script rather than calling `./gradlew` directly.** The wrapper needs
+#    JAVA_HOME, and a host where the JDK lives inside the Android toolchain (no system `java`) has
+#    none - `./gradlew` then dies with "JAVA_HOME is not set". This script resolves it through
+#    scripts/_hostenv.sh first. Anything after the mode is passed straight to gradle, so
+#    `bash scripts/build.sh release -PvncProfile=lefty.json` works the same as the gradle form.
 #
 # 🔴 **Use release for everyday work.** A debug build is `debuggable`, so ART gives up
 #    optimisations - measured 2026-09-15 on full-motion content: 20.8 fps debug against 33.2 fps
@@ -25,10 +32,11 @@ G=./gradlew
 MODE="${1:-release}"
 case "$MODE" in
   test)    shift 2>/dev/null; exec "$G" :app:testDebugUnitTest "$@" ;;
+  preview) shift 2>/dev/null; exec "$G" :app:previewProfiles "$@" ;;
   debug)   TASK=:app:assembleDebug;   OUT=app/build/outputs/apk/debug/app-debug.apk ;;
   release|install) TASK=:app:assembleRelease; OUT=app/build/outputs/apk/release/app-release.apk ;;
   aab)     TASK=:app:bundleRelease;   OUT=app/build/outputs/bundle/release/app-release.aab ;;
-  *) echo "usage: bash scripts/build.sh [release|debug|aab|test|install]"; exit 2 ;;
+  *) echo "usage: bash scripts/build.sh [release|debug|aab|test|preview|install]"; exit 2 ;;
 esac
 
 # 🔴 **Stops development connection details being baked into a published artefact.**

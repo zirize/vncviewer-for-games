@@ -57,8 +57,8 @@ the single place host-specific paths are allowed to live.
 ```bash
 cp profiles/default.json profiles/mine.json
 $EDITOR profiles/mine.json
-./gradlew :app:previewProfiles                        # validate + draw an SVG of the result
-./gradlew :app:assembleRelease -PvncProfile=mine.json  # build with it
+bash scripts/build.sh preview                          # validate + draw an SVG of the result
+bash scripts/build.sh release -PvncProfile=mine.json    # build with it
 ```
 
 The format is documented in [`docs/layout-profile.md`](docs/layout-profile.md), and
@@ -74,7 +74,7 @@ Most of the time the person who wants a different layout will not edit the JSON 
 will ask a coding agent to do it. So the repository is built to let an agent **prove it got it
 right** without hardware:
 
-- `./gradlew :app:previewProfiles` validates every profile and renders each one to
+- `bash scripts/build.sh preview` validates every profile and renders each one to
   `app/build/preview/<id>.svg`.
 - Deliberately broken profiles live in `app/src/test/resources/broken-profiles/` and are part of
   the test suite, so the checks themselves are checked.

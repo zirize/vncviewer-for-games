@@ -50,7 +50,7 @@ The two things that bite:
 ## 3. Validate
 
 ```bash
-./gradlew :app:previewProfiles
+bash scripts/build.sh preview
 ```
 
 **If it fails**, the message names the button and says how to fix it. The common ones:
@@ -88,7 +88,7 @@ If it is wrong, go back to step 2. If it is right, this SVG is what you show the
 ## 5. Build it
 
 ```bash
-./gradlew :app:assembleRelease -PvncProfile=lefty.json
+bash scripts/build.sh release -PvncProfile=lefty.json
 ```
 
 The APK lands in `app/build/outputs/apk/release/`. `bash scripts/build.sh install` builds and
