@@ -31,10 +31,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import io.github.zirize.vncviewerforgames.R
 import io.github.zirize.vncviewerforgames.VncSurfaceView
 import io.github.zirize.vncviewerforgames.input.PointerMode
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 /**
@@ -70,6 +73,18 @@ fun SettingsSheet(view: VncSurfaceView, onDismiss: () -> Unit) {
 
     var confirming by remember { mutableStateOf<RiskyOption?>(null) }
 
+    // 🔴 **Sending closes the sheet** (asked for on the device, 2026-09-17). The text lands on a
+    //    screen this sheet is covering, so staying open means typing into something you cannot
+    //    see - and the second press of Send would be a blind repeat. Closing *is* the confirmation.
+    // 🔑 `clearFocus()` first: it puts the phone's keyboard away. Without it the keyboard can
+    //    outlive the sheet and sit over the game with nothing to type into.
+    val scope = rememberCoroutineScope()
+    val focus = LocalFocusManager.current
+    fun closeSheet() {
+        focus.clearFocus()
+        scope.launch { sheetState.hide() }.invokeOnCompletion { onDismiss() }
+    }
+
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             // 🔑 `imePadding` because this sheet now has a text field people actually type into.
@@ -91,7 +106,7 @@ fun SettingsSheet(view: VncSurfaceView, onDismiss: () -> Unit) {
             //    other IME language) work without this app knowing anything about it.
             SectionTitle(stringResource(R.string.settings_section_keyboard),
                 stringResource(R.string.settings_sends_now))
-            SendTextRow { text, withReturn -> view.sendText(text, withReturn) }
+            SendTextRow { text, withReturn -> view.sendText(text, withReturn); closeSheet() }
 
             // 🔑 **There is deliberately no disconnect or reconnect button here.**
             //    (a) An ordinary failure retries by itself once a second, so there is nothing to press.
@@ -247,17 +262,24 @@ private fun PendingBar(view: VncSurfaceView, onReconnect: () -> Unit) {
  * clipboard is the option that has hung x11vnc-family servers before. Key presses land anywhere a
  * keyboard lands - including a game that has never heard of Ctrl+V.
  *
- * 🔑 **The field is cleared after every send**, because the second press of Send would otherwise
- * type the same line again, and there is nothing on screen to say whether the first one arrived.
- * ❓ Assumption: the sheet **stays open** after a send. Closing it would show the result, but then
- * sending two lines means re-opening settings twice.
+ * 🔑 **One row, not a block.** The field holds a line only until it is sent and is then cleared -
+ * it is a doorway, not a document. It sat above its own paragraph of explanation at first and took
+ * up a third of the sheet for something you look at for two seconds. The screen is always
+ * landscape, so the buttons fit beside it.
+ *
+ * 🔑 **Sending closes the sheet**, so what was typed is visible the moment it is sent. The field
+ * is cleared too, which only matters for the case where something re-opens the sheet at once.
  */
 @Composable
 private fun SendTextRow(onSend: (String, Boolean) -> Unit) {
     var text by remember { mutableStateOf("") }
     fun send(withReturn: Boolean) { onSend(text, withReturn); text = "" }
 
-    Column(Modifier.fillMaxWidth()) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         OutlinedTextField(
             value = text,
             onValueChange = { text = it },
@@ -265,27 +287,21 @@ private fun SendTextRow(onSend: (String, Boolean) -> Unit) {
             singleLine = true,
             // 🔑 The phone keyboard's own action key sends, so a line can be typed and sent
             //    without looking away from the keyboard. It sends **with** Enter, because that is
-            //    what the key means everywhere else; "Send" without it is the button below.
+            //    what the key means everywhere else; "Send" without it is the button beside it.
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
             keyboardActions = KeyboardActions(onSend = { send(true) }),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            modifier = Modifier.weight(1f),
         )
-        Text(stringResource(R.string.settings_send_text_hint),
-            style = MaterialTheme.typography.bodySmall)
-        Row(Modifier.fillMaxWidth().padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = { send(false) }, enabled = text.isNotEmpty()) {
-                Text(stringResource(R.string.settings_send))
-            }
-            Button(onClick = { send(true) }, enabled = text.isNotEmpty()) {
-                Text(stringResource(R.string.settings_send_enter))
-            }
-            // 🔑 Enter on its own, with the field empty: the remote is showing a dialog that only
-            //    needs confirming, and the panel's ↵ button is behind this sheet.
-            TextButton(onClick = { onSend("", true) }) {
-                Text(stringResource(R.string.settings_enter_only))
-            }
+        Button(onClick = { send(false) }, enabled = text.isNotEmpty()) {
+            Text(stringResource(R.string.settings_send))
+        }
+        Button(onClick = { send(true) }, enabled = text.isNotEmpty()) {
+            Text(stringResource(R.string.settings_send_enter))
+        }
+        // 🔑 Enter on its own, with the field empty: the remote is showing a dialog that only
+        //    needs confirming, and the panel's ↵ button is behind this sheet.
+        TextButton(onClick = { onSend("", true) }) {
+            Text(stringResource(R.string.settings_enter_only))
         }
     }
 }

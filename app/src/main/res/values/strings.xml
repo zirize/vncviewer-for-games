@@ -28,7 +28,6 @@
 
     <!-- ── Settings: keyboard ──────────────────────────────────────── -->
     <string name="settings_send_text">Text to type on the remote screen</string>
-    <string name="settings_send_text_hint">Typed one key at a time, into whatever has the keyboard focus over there. It is not a clipboard paste, so it also works inside a game.</string>
     <string name="settings_send">Send</string>
     <string name="settings_send_enter">Send + Enter</string>
     <string name="settings_enter_only">Enter only</string>

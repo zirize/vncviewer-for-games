@@ -144,8 +144,14 @@ own action key is the second of those — it means "and confirm" everywhere else
 The empty field plus **Enter only** is how you confirm a dialog on the remote while the sheet is
 covering the panel's ↵ button.
 
-❓ The sheet **stays open** after a send, so the result is not visible until it is closed. The
-alternative — closing on send — costs a re-open for every line.
+**Sending closes the sheet.** The text lands on a screen the sheet is covering, so staying open
+means typing into something you cannot see, and a second press of Send would be a blind repeat.
+Closing is the confirmation. (It was the other way round for a day; changed 2026-09-17.)
+
+**One row, not a block.** The field is a doorway, not a document: it holds a line until it is sent
+and is then cleared. It first shipped above its own paragraph of explanation, which took a third of
+the sheet for something you look at for two seconds. The screen is always landscape, so the three
+buttons sit beside it.
 
 ---
 

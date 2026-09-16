@@ -24,7 +24,6 @@
     <string name="settings_sends_now">누르면 바로 전송</string>
 
     <string name="settings_send_text">원격 화면에 입력할 글자</string>
-    <string name="settings_send_text_hint">원격 화면에서 «포커스가 있는 곳»에 한 글자씩 «키로» 들어갑니다. 클립보드 붙여넣기가 아니라서 게임 안에서도 됩니다.</string>
     <string name="settings_send">보내기</string>
     <string name="settings_send_enter">보내고 Enter</string>
     <string name="settings_enter_only">Enter만</string>
