@@ -8,7 +8,7 @@ Read this before you start optimising or before you delete something that looks 
 | | |
 |---|---|
 | [`decoder-performance.md`](decoder-performance.md) | What is and is not the bottleneck, and eight hypotheses that were measured and disproved |
-| [`bugs-worth-remembering.md`](bugs-worth-remembering.md) | Four defects whose shape is worth recognising again |
+| [`bugs-worth-remembering.md`](bugs-worth-remembering.md) | Five defects whose shape is worth recognising again |
 | [`measuring.md`](measuring.md) | How to measure here without fooling yourself |
 
 Two habits run through all of them:

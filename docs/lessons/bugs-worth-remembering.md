@@ -1,4 +1,4 @@
-# Four defects worth recognising again
+# Five defects worth recognising again
 
 None of these threw an error. Each compiled, ran, and looked fine.
 
@@ -64,10 +64,30 @@ Found with a JDWP thread dump (`pool-4-thread-1` waiting on a monitor at `Socket
 🔑 This one also froze **touch input**, because pointer events are written from a different thread.
 A "the screen is frozen" report and an "input does nothing" report were the same defect.
 
+## 5. Settings were never stored, and a developer build hid it
+
+There was no persistence at all: `VncConnectionConfig` is built fresh at every launch from
+`BuildConfig`, so the server address a user typed into the settings sheet was gone the next time
+they opened the app. Everything else in the sheet went with it.
+
+🔑 **Why it survived so long** — a development build bakes `vnc.dev.host` in from
+`local.properties`. On the machine where the app is written, it therefore comes up connected to the
+right server every single time, which is indistinguishable from "it remembered what I typed". In a
+published build that default is the empty string, so only a user ever saw the bug.
+
+The fix (`settings/SettingsCodec`) loads in the `VncSurfaceView` constructor, before anything dials
+out, and saves from the sheet's `changed()`. Two things were deliberately left unsaved: `viewOnly`,
+because restoring it gives an app where nothing responds and nothing says why, and the password,
+which lives in untracked `local.properties` precisely so it is not written down.
+
+The lesson is about *whose* machine the evidence came from: a default that is convenient for the
+person developing can stand in for a feature that was never written.
+
 ---
 
 ## The pattern
 
-All four are invisible to inspection and invisible to the user as anything except "it feels wrong".
+The first four are invisible to inspection and invisible to the user as anything except "it feels
+wrong".
 What found them: a thread dump, a wire capture, and a counter (`maxPar`) added specifically to
 measure a suspicion. **When something feels wrong and the code looks fine, add the instrument.**

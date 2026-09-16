@@ -35,6 +35,9 @@ import android.view.KeyEvent
 import io.github.zirize.vncviewerforgames.conn.VncConnectionConfig
 import io.github.zirize.vncviewerforgames.conn.StartupFailureWatcher
 import io.github.zirize.vncviewerforgames.conn.VncConnectionState
+import io.github.zirize.vncviewerforgames.settings.SettingsCodec
+import io.github.zirize.vncviewerforgames.settings.SettingsStore
+import io.github.zirize.vncviewerforgames.settings.SharedPrefsSettingsStore
 
 class VncSurfaceView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -294,11 +297,41 @@ class VncSurfaceView @JvmOverloads constructor(
         synchronized(frameLock) { framePending = true; frameLock.notify() }
     }
 
+    /**
+     * Where the settings the user changed are kept between launches.
+     * 🔑 [SharedPrefsSettingsStore.createOrNull] never throws; under a Compose `@Preview` it
+     *    hands back a store that keeps nothing, which is exactly how this view behaved before
+     *    settings were persisted at all.
+     */
+    private val settingsStore: SettingsStore = SharedPrefsSettingsStore.createOrNull(context)
+
     init {
         holder.addCallback(this)
         // 🔑 Focus is required to receive key events. Without it, onKeyDown is never called at all.
         isFocusable = true
         isFocusableInTouchMode = true
+        // 🔴 **Before anything connects.** The first connection is started from
+        //    `surfaceCreated`, which cannot run until this constructor has returned - so loading
+        //    here is what makes the saved address the one that is actually dialled, rather than
+        //    one connection going out to the build-time default first.
+        if (SettingsCodec.load(settingsStore, connectionConfig, pointer.config, latch.config)) {
+            Log.i("VncSurfaceView", "loaded saved settings " +
+                    "(${connectionConfig.host}:${connectionConfig.port})")
+        }
+    }
+
+    /**
+     * Writes the current settings out.
+     *
+     * 🔴 **The settings sheet has to call this on every change.** There is no single place
+     * where a setting is written - the sheet assigns to the config objects directly - so nothing
+     * else can notice that something changed. It is cheap: the writes are buffered and applied
+     * off-thread.
+     * 🔑 Not everything is stored; see [SettingsCodec] for what is left out and why
+     * (`viewOnly` and the password, above all).
+     */
+    fun saveSettings() {
+        SettingsCodec.save(settingsStore, connectionConfig, pointer.config, latch.config)
     }
 
     // ── Keyboard ────────────────────────────────────────────────────────

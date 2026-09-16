@@ -57,7 +57,12 @@ fun SettingsSheet(view: VncSurfaceView, onDismiss: () -> Unit) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // 🔑 The sheet has to show the *current* values, so they are read once on open and held in Compose state.
     var tick by remember { mutableStateOf(0) }
-    fun changed() { tick++ }
+    // 🔴 **Every row goes through here, and that is the only reason settings survive a
+    //    restart.** The rows assign to `view.connectionConfig` / `pointerConfig` / `keyConfig`
+    //    directly, so there is nowhere else that can see a change happen. Add a row that skips
+    //    `changed()` and it will look like it works and be gone at the next launch - which is the
+    //    bug this was written to fix (the address was not being kept).
+    fun changed() { tick++; view.saveSettings() }
 
     var confirming by remember { mutableStateOf<RiskyOption?>(null) }
 

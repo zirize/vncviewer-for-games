@@ -72,6 +72,20 @@ same layout in dp; **do not convert it back.** 114px ÷ 2.625 = 43.43dp, and 43d
 rounding through dp moves every button by a pixel or two. The layout code already scales in the
 authored-pixel space.
 
+### 2.5 A settings row that skips `changed()` is not saved
+
+Every row in `SettingsSheet` calls `changed()`, and that call is what writes the settings out
+(`VncSurfaceView.saveSettings()`). The rows assign to `connectionConfig` / `pointerConfig` /
+`keyConfig` directly, so there is no other place that can notice a change.
+
+Leave it out of a new row and **the setting works perfectly until the app is restarted**, at which
+point it is silently back to its default. That is the bug this mechanism was added for: the server
+address was not being kept, and it went unnoticed because a development build has `vnc.dev.host`
+baked in from `local.properties`, so on a developer's device it looked like it was being remembered.
+
+Read the header of `settings/SettingsCodec` before storing anything new — `viewOnly`, the password,
+and every setting without a control are left out on purpose.
+
 ---
 
 ## 3. How to know you are done

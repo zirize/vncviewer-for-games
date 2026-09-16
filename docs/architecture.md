@@ -25,6 +25,7 @@ A map of what is where, and which parts you can change without a device.
 | `input/` | The key ledger, modifier latching, pointer gestures, keysym mapping |
 | `conn/` | Connection config, connection state, adaptive chroma, the startup-failure watcher |
 | `ui/` | Compose screens: the main screen, the connection banner, the settings sheet |
+| `settings/` | Keeping the settings the user changed between launches |
 | `perf/` | The one-line-per-second performance counters |
 | (root) | `VncEngine`, `VncSurfaceView`, `CustomPixelBuffer`, `JpegDecoder` |
 
@@ -90,3 +91,31 @@ exception and applies immediately, because the send gate consults it every time.
 If the first connection fails, `StartupFailureWatcher` opens the settings sheet by itself. Without
 that, a wrong address leaves no way in — the only route to settings is the overlay button, and the
 banner only says "retrying".
+
+## Remembering settings
+
+`settings/SettingsCodec` reads and writes what the sheet can change; `SharedPrefsSettingsStore` is
+the `SharedPreferences` behind it, and the codec itself touches no `android.*`, so it is tested
+under JUnit like everything else here.
+
+It loads in the `VncSurfaceView` constructor — before `surfaceCreated`, i.e. before anything dials
+out, so the saved address is the one that is actually used. It saves from the settings sheet's
+`changed()`, which every row already calls, because the rows assign to the config objects directly
+and nothing else can see a change happen.
+
+Three decisions worth keeping:
+
+- **Only settings with a control are stored.** Store one without, and its default is frozen on
+  every device that ever ran the app — improving it later (as `subsampling` and `cursorShape` both
+  were) would never reach an existing install, and there would be no control to undo it with.
+- **`viewOnly` and the password are never stored.** View-only restored at startup is an app where
+  nothing responds and nothing says why; the password lives in untracked `local.properties`
+  precisely so it is not written down.
+- **A saved address beats `vnc.dev.host`.** It has to, or the user's own address loses to a
+  build-time default — so after a save, pointing a device somewhere else means the sheet (or
+  clearing the app's data), not `local.properties`.
+
+Until this existed nothing was kept at all: `VncConnectionConfig` starts from `BuildConfig`, empty
+in a published build, so a typed-in address was gone at the next launch. It stayed unnoticed because
+a development build has `vnc.dev.host` baked in, which on a developer's device looks exactly like
+being remembered.
