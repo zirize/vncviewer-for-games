@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>An Android VNC client built for playing games, not for desk work</title>
+<meta name="description" content="A VNC viewer for Android shaped around playing games on a remote desktop: large always-on touch buttons in the screen margins, latching modifiers, a D-pad and a wheel, and a button layout you regenerate from a JSON profile. Published on Google Play as RemotePad." />
+<meta name="author" content="zirize" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://zirize.github.io/vncviewer-for-games/" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zirize.github.io/vncviewer-for-games/" />
+<meta property="og:title" content="An Android VNC client built for playing games" />
+<meta property="og:description" content="Large always-on touch buttons in the margins, latching modifiers, a D-pad and a wheel — and a layout that is data, not code." />
+<meta name="twitter:card" content="summary" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "An Android VNC client built for playing games",
+  "description": "A VNC viewer for Android shaped around playing games on a remote desktop: large always-on touch buttons in the screen margins, latching modifiers, a D-pad and a wheel, and a button layout you regenerate from a JSON profile. Published on Google Play as RemotePad.",
+  "url": "https://zirize.github.io/vncviewer-for-games/",
+  "inLanguage": "en",
+  "author": { "@type": "Person", "name": "zirize", "url": "https://github.com/zirize" },
+  "isPartOf": { "@type": "WebSite", "name": "zirize", "url": "https://zirize.github.io/" },
+  "about": ["VNC", "Android", "remote desktop", "gaming", "TigerVNC", "libjpeg-turbo", "touch controls"]
+}
+</script>
+<style>
+:root{--bg:#0f1117;--surface:#1a1d27;--border:#2d3148;--accent:#7c6af7;--accent2:#56c8a0;--text:#e2e4ef;--muted:#8b90b0;--radius:10px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+header{background:linear-gradient(135deg,#1a1d27 0%,#12141e 100%);border-bottom:1px solid var(--border);padding:56px 20px 44px;text-align:center}
+header h1{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px}
+header p{font-size:1.05rem;color:var(--muted);max-width:620px;margin:0 auto 22px}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btns a{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:.9rem;font-weight:500}
+.btns a:hover{text-decoration:none;border-color:var(--accent)}
+.btns a.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+main{max-width:820px;margin:0 auto;padding:48px 20px;flex:1}
+h2{font-size:1.35rem;margin:44px 0 14px;color:var(--text)}
+h2:first-child{margin-top:0}
+h3{font-size:1.05rem;margin:28px 0 10px;color:var(--accent2)}
+p{margin-bottom:14px;color:var(--text)}
+ul,ol{margin:0 0 16px 22px}
+li{margin-bottom:8px}
+code{font-family:ui-monospace,'Cascadia Code',Menlo,monospace;font-size:.88em;background:#12141e;border:1px solid var(--border);border-radius:5px;padding:1px 6px}
+pre{background:#12141e;border:1px solid var(--border);border-radius:var(--radius);padding:16px;overflow-x:auto;margin-bottom:16px}
+pre code{background:none;border:none;padding:0;font-size:.85rem;line-height:1.6}
+table{width:100%;border-collapse:collapse;margin-bottom:18px;font-size:.92rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.82rem;text-transform:uppercase;letter-spacing:.5px}
+.symptoms{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:var(--radius);padding:20px 24px 8px;margin-bottom:8px}
+.note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;font-size:.93rem;color:var(--muted)}
+.note strong{color:var(--text)}
+footer{text-align:center;padding:32px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>An Android VNC client built for playing games</h1>
+  <p>Every VNC viewer out there is built for administering machines. Play a game through one and you spend the whole time fighting the client. This one is the other shape.</p>
+  <div class="btns">
+    <a class="primary" href="https://github.com/zirize/vncviewer-for-games">Source on GitHub</a>
+    <a href="https://github.com/zirize/vncviewer-for-games/blob/main/docs/layout-profile.md">Layout profile format</a>
+    <a href="https://github.com/zirize/vncviewer-for-games/blob/main/docs/make-a-variant.md">Make a variant</a>
+  </div>
+</header>
+<main>
+<div class="symptoms">
+<h3>What a games-first viewer changes</h3>
+<ul>
+<li><strong>Controls live in the black margins</strong> beside the remote screen, so they cost you no picture.</li>
+<li><strong>They are always there.</strong> No summoning a keyboard mid-fight.</li>
+<li><strong>Modifiers latch.</strong> Tap Ctrl for one-shot, tap twice to lock — you do not need a second hand.</li>
+<li><strong>The layout is data.</strong> One JSON file, regenerated for whoever is holding the phone.</li>
+</ul>
+</div>
+
+<h2>What it does</h2>
+<ul>
+<li><strong>On-screen controls in the margins.</strong> Page Up / Page Down, Ctrl, Enter, Esc, a D-pad,
+    mouse wheel up/down and free letter keys. Drawn on a 60 %-black background with a white outline so
+    they stay readable over a bright screen; anywhere that is not a button passes straight through to
+    the trackpad.</li>
+<li><strong>Latching modifiers.</strong> One-shot on a tap, locked on a double tap.</li>
+<li><strong>Trackpad or absolute pointing.</strong> Long-press for right click, two-finger scroll.</li>
+<li><strong>Tight/JPEG decoding on four worker threads</strong>, through libjpeg-turbo with NEON.</li>
+<li><strong>A settings sheet that opens itself</strong> if the very first connection fails, so a fresh
+    install is never a dead end.</li>
+</ul>
+
+<div class="note"><strong>Two names, one codebase.</strong> The project is
+<code>vncviewer-for-games</code>. The build published on Google Play is called <strong>RemotePad</strong>
+(<code>tech.doldam.remotepad</code>). Same source; only the application id differs, so a fork can never
+overwrite the published app.</div>
+
+<h2>Build</h2>
+<p>JDK 17 and an Android SDK with NDK.</p>
+<pre><code>git clone --recursive https://github.com/zirize/vncviewer-for-games.git
+cd vncviewer-for-games
+bash scripts/doctor.sh          # checks the toolchain; changes nothing
+bash scripts/build.sh           # release APK
+bash scripts/build.sh install   # ...and push it to a connected device</code></pre>
+<p><code>--recursive</code> matters: libjpeg-turbo is a submodule. If you already cloned without it,
+<code>git submodule update --init --recursive</code>. If <code>doctor.sh</code> cannot find your JDK or
+SDK, add your path to <code>scripts/_hostenv.sh</code> — that file is the single place host-specific
+paths are allowed to live.</p>
+<div class="note">Use <strong>release</strong> builds for everyday use. Debug builds are visibly slower
+because <code>debuggable</code> makes ART give up optimisations — measured at 20.8 fps against
+33.2 fps on a full-motion test. Release builds are signed with a debug key unless a
+<code>keystore.properties</code> exists.</div>
+
+<h2>Make it fit your hands</h2>
+<pre><code>cp profiles/default.json profiles/mine.json
+$EDITOR profiles/mine.json
+bash scripts/build.sh preview                        # validate + draw an SVG of the result
+bash scripts/build.sh release -PvncProfile=mine.json # build with it</code></pre>
+<p>The format is documented in <code>docs/layout-profile.md</code>, and
+<code>docs/make-a-variant.md</code> is a step-by-step recipe including what to do when each step
+fails. <strong>You do not need the device to check your work</strong> — validation and the SVG
+preview both run on a plain JVM.</p>
+
+<h2>This repository expects to be read by agents</h2>
+<p>Most of the time the person who wants a different layout will not edit the JSON themselves; they
+will ask a coding agent to do it. So the repository is built to let an agent <strong>prove it got it
+right</strong> without hardware:</p>
+<ul>
+<li><code>bash scripts/build.sh preview</code> validates every profile and renders each one to
+    <code>app/build/preview/&lt;id&gt;.svg</code>.</li>
+<li>Deliberately broken profiles live in <code>app/src/test/resources/broken-profiles/</code> and are
+    part of the test suite, so the checks themselves are checked.</li>
+<li><code>AGENTS.md</code> is the entry point, including the things an agent must refuse.</li>
+</ul>
+<div class="note">The single most important rule: <strong>a layout must keep a way into settings.</strong>
+Remove that button and the person holding the phone can no longer change anything — the validator
+rejects it.</div>
+
+<h2>Licence</h2>
+<p>GPL-2.0-or-later. Not a preference: the viewer is built on the
+<a href="https://github.com/TigerVNC/tigervnc">TigerVNC</a> Java client, which is
+GPL-2.0-or-later, so the combined work is too. Third-party components and their notices are in
+<code>NOTICE</code>.</p>
+</main>
+<footer>
+  <p><a href="https://zirize.github.io/">zirize</a> · <a href="https://github.com/zirize/vncviewer-for-games">GitHub</a></p>
+</footer>
+</body>
+</html>
