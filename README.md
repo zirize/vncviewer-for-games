@@ -1,5 +1,7 @@
 # vncviewer-for-games
 
+📄 Project page: **[An Android VNC client built for playing games, not for desk work](https://zirize.github.io/vncviewer-for-games/)** · More projects: **[zirize.github.io](https://zirize.github.io/)**
+
 An Android VNC client for **playing games** on a remote desktop — not for desk work.
 
 ![The on-screen controls over a remote desktop](docs/images/overlay.png)
