@@ -22,17 +22,20 @@ and you can regenerate it for whoever is going to hold the phone.
 
 ## Trying it on your phone
 
-RemotePad is on Google Play, currently on the **internal testing** track. That track is invitation
-only: Google will not show the app to an account that is not on the tester list, so there is no
-public link to hand out.
+RemotePad is going to Google Play, on the **internal testing** track — the track is being set up
+now. That track is invitation only: Play matches the tester list against the account that opens the
+link, so there is no public link to hand out.
 
-**If you would like to try it, email the Google account address your phone signs in with to
-[zirize@gmail.com](mailto:zirize@gmail.com).** You will be added to the tester list and sent the
-install link.
+**Want in? Send the Google account address you would install it with to
+[zirize@gmail.com](mailto:zirize@gmail.com)** — by email, **not in an issue**, so your address does
+not end up on a public page. You go on the tester list, and the link that installs it from Play
+comes back to you as soon as the track opens. It takes up to 100 people.
 
 A few things worth knowing before you write:
 
-- It must be the **Google account on the device**, not just any address — that is what Play checks.
+- 🔑 It has to be the address of the **Google account on the phone**. Play matches the tester list
+  against the account that opens the link, so any other address will simply say the app is not
+  available — and that symptom tells you nothing about why.
 - The address is used to add you as a tester and to send you the link. Nothing else. The app itself
   collects nothing; see the [privacy policy](https://zirize.github.io/vncviewer-for-games/privacy.html).
 - Android **7.0 or newer** (API 24).
