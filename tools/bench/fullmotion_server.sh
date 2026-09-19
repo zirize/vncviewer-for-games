@@ -27,6 +27,9 @@ PASSFILE="$HOME/.vnc/bench.passwd"
 #    A clip given explicitly is never generated: if it is missing, this fails immediately.
 CLIP="${VNCBENCH_CLIP:-/tmp/vncbench_testsrc.mp4}"
 PIDFILE="/tmp/vncbench_mpv.pid"
+# 🔑 Remembers whether a :2 test server was running before start() took it down, so stop()
+#    can put the host back the way it found it rather than the way it assumed it was.
+HAD2FILE="/tmp/vncbench_had_disp2"
 
 make_clip() {
   [ -f "$CLIP" ] && return
@@ -59,6 +62,18 @@ start() {
   printf '%s\n' "$pw" | vncpasswd -f > "$PASSFILE" 2>/dev/null
   chmod 600 "$PASSFILE"
 
+  # 🔴 Record whether a :2 test server was **actually** running before taking it down.
+  #    `stop` used to start one unconditionally, so a host that had none got one anyway - a VNC
+  #    server left listening on the LAN that nobody asked for. Same shape as the bug fixed in the
+  #    probes on 2026-09-19: a cleanup that *assumes* the original state instead of recording it.
+  # ⚠ `vncserver -list` prints the display **without** the colon and space-padded
+  #    ("2         <TAB>5900<TAB>..."), so a `^:2` pattern silently never matches - and a detector
+  #    that never fires looks exactly like "there was nothing to restore".
+  if vncserver -list 2>/dev/null | grep -qE '^:?2[[:space:]]'; then
+    printf 'yes\n' > "$HAD2FILE"
+  else
+    rm -f "$HAD2FILE"
+  fi
   vncserver -kill :2 >/dev/null 2>&1 || true
   vncserver -kill "$DISP" >/dev/null 2>&1 || true
   vncserver "$DISP" -rfbport "$PORT" -geometry 1920x1080 -depth 24 \
@@ -81,10 +96,16 @@ stop() {
   vncserver -kill "$DISP" >/dev/null 2>&1 || true
   rm -f "$PASSFILE"
   set_dev_props "" "" ""
-  # Bring the :2 test server back
-  vncserver :2 -rfbport 5900 -geometry 1920x1080 -depth 24 \
-            -localhost no -AlwaysShared >/dev/null 2>&1 || true
-  echo "[bench] cleaned up - one-time password deleted, local.properties restored, :2 back"
+  # 🔑 Bring :2 back **only if it was there to begin with** - see the note in start().
+  if [ -f "$HAD2FILE" ]; then
+    vncserver :2 -rfbport 5900 -geometry 1920x1080 -depth 24 \
+              -localhost no -AlwaysShared >/dev/null 2>&1 || true
+    rm -f "$HAD2FILE"
+    echo "[bench] cleaned up - one-time password deleted, local.properties restored, :2 back"
+  else
+    echo "[bench] cleaned up - one-time password deleted, local.properties restored."
+    echo "[bench]   (there was no :2 server before this ran, so none was started)"
+  fi
 }
 
 case "${1:-}" in
