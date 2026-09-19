@@ -58,6 +58,11 @@ the single place host-specific paths are allowed to live.
 > builds for everyday work: debug builds are visibly slower, because `debuggable` makes ART give
 > up optimisations (measured: 20.8 fps vs 33.2 fps on a full-motion test).
 
+**No APK is published here, and that is deliberate.** A signed APK carries its signing certificate,
+and anyone holding the file can read that certificate without a password — so shipping builds would
+also ship whatever identifying details the signer put in it. Build from source, or install the
+published build from Google Play.
+
 ## Make it fit your hands
 
 ```bash

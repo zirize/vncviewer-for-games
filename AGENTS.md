@@ -142,6 +142,11 @@ That compares the preview against the real screen, and needs no SVG rasteriser.
 ## 6. Things to stop and ask about
 
 - Anything that leaves the repository: pushing, publishing, uploading a build.
+- **Do not publish a built APK** — not as a release, not as an attachment, not as a link. A signed
+  APK exposes its signing certificate to anyone who has the file, readable without a password, and
+  that certificate carries whatever the signer put in it. This is why there are no releases here;
+  it is a decision, not an oversight, so do not helpfully add one. If distribution outside the
+  store is ever wanted, it needs a key minted for that purpose — ask first.
 - Signing keys, store listings, application ids. `applicationId` deliberately differs between the
   original author's build and everyone else's; do not "fix" that.
 - Removing a capability because it is currently unused — check `docs/lessons/` first, because some
