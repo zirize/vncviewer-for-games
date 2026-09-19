@@ -29,8 +29,7 @@ does nothing at all for someone who is not on that list. That is why there is no
 **Want in? Send the Google account address you would install it with to
 [zirize@gmail.com](mailto:zirize@gmail.com)** — by email, **not in an issue**, so your address does
 not end up on a public page. I add you to the tester list and send the link back to you; it starts
-working once you are on the list, not before. The track holds **up to 100 testers** — more can be
-invited than that, but only the first hundred to join count.
+working once you are on the list, not before.
 
 A few things worth knowing before you write:
 
