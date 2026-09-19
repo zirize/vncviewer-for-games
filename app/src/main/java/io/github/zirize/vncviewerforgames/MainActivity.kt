@@ -18,10 +18,13 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    // 🔑 Play Console's edge-to-edge check is a **static scan for a call to
-    //    `EdgeToEdge.enable()` in the bytecode**, so the import alone (which is all that was here)
-    //    produces no code and does not satisfy it. It also does what line "setDecorFitsSystemWindows
-    //    (window, false)" below does, so the two agree rather than fight.
+    // 🔑 This is the current way to ask for an edge-to-edge window, and it does what the
+    //    `setDecorFitsSystemWindows(window, false)` line below does, so the two agree rather than
+    //    fight. Before 2026-09-19 the import was here and the call was not, which is no call at all.
+    // ℹ It was added on a report that Play Console asks for edge-to-edge and checks for this exact
+    //    call. **That turned out to be unverified** - the Console shows no such item for this app
+    //    (checked 2026-09-19, four screens). The line stays because it is the right API for a
+    //    window that draws behind the bars, not because a store demanded it.
     // 🔴 It must come **before** the bar-hiding calls: those are what we actually want on a
     //    gamepad overlay, and whatever style this sets applies only to the transient bars that
     //    appear on a swipe.

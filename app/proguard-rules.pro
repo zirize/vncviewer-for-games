@@ -41,8 +41,16 @@
 #    looking for that call finds nothing. Measured: 5 references with this rule, 0 without.
 # ℹ Cost: **nothing measurable.** Both APKs came out at exactly 5,453,117 bytes (different
 #    md5, so the two builds really did differ - 5 references vs 0).
-# ❓ Whether Play's edge-to-edge check really is such a scan is second-hand (from the mobile-fd
-#    session, working on a Flutter app). It is cheap insurance either way, so it stays until
-#    someone can check the Console panel itself.
+# 🔴 **The reason this rule was added turned out to be unverified.** It was added because a
+#    sibling session reported that Play Console asks for edge-to-edge and that the check is such a
+#    scan. Someone then looked: across four Console screens (app dashboard, publishing overview,
+#    internal test track, release detail) for two apps, **there is no edge-to-edge item at all**
+#    (observed 2026-09-19). Not "it disappeared after upload" - it was never there.
+#    ❓ Why it never appears is **not known**. `targetSdk 36` means the OS enforces edge-to-edge
+#      anyway, which would explain it, but nobody has seen Google say so. Do not write that down
+#      as the reason.
+# ✅ **The rule stays** - it costs nothing measurable, and the day a scan does look for that call
+#    the name is there. But it is **insurance against something never observed**, so if you are
+#    cleaning this file out, this is the safe one to drop. Removing it changes no behaviour.
 -keep class androidx.activity.EdgeToEdge { *; }
 -keep class androidx.activity.EdgeToEdgeApi* { *; }
