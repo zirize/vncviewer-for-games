@@ -55,6 +55,12 @@ th{color:var(--muted);font-weight:600;font-size:.82rem;text-transform:uppercase;
 .symptoms{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:var(--radius);padding:20px 24px 8px;margin-bottom:8px}
 .note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;font-size:.93rem;color:var(--muted)}
 .note strong{color:var(--text)}
+.invite{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:var(--radius);padding:20px 22px;margin:0 0 40px}
+.invite h3{margin-top:0;color:var(--accent2)}
+.invite p{margin:0 0 12px}
+.invite ul{margin:0 0 12px 20px}
+.invite li{margin:5px 0}
+.invite .alt{margin-bottom:0;color:var(--muted);font-size:.92rem}
 footer{text-align:center;padding:32px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem}
 </style>
 </head>
@@ -63,12 +69,33 @@ footer{text-align:center;padding:32px 20px;border-top:1px solid var(--border);co
   <h1>An Android VNC client built for playing games</h1>
   <p>Every VNC viewer out there is built for administering machines. Play a game through one and you spend the whole time fighting the client. This one is the other shape.</p>
   <div class="btns">
-    <a class="primary" href="https://github.com/zirize/vncviewer-for-games">Source on GitHub</a>
+    <a class="primary" href="mailto:zirize@gmail.com?subject=RemotePad%20internal%20test">Ask for a test invite</a>
+    <a href="https://github.com/zirize/vncviewer-for-games">Source on GitHub</a>
     <a href="https://github.com/zirize/vncviewer-for-games/blob/main/docs/layout-profile.md">Layout profile format</a>
     <a href="https://github.com/zirize/vncviewer-for-games/blob/main/docs/make-a-variant.md">Make a variant</a>
   </div>
 </header>
 <main>
+
+<div class="invite">
+<h3>Want to try it on your phone?</h3>
+<p>RemotePad is on Google Play, on the <strong>internal testing</strong> track. That track is
+invitation only — Play will not show the app to an account that is not on the tester list, so
+there is no public link to hand out.</p>
+<p><strong>Email the Google account address your phone signs in with to
+<a href="mailto:zirize@gmail.com?subject=RemotePad%20internal%20test">zirize@gmail.com</a></strong>,
+and you will be added to the list and sent the install link.</p>
+<ul>
+<li>It has to be the <strong>Google account on the device</strong> — that is what Play checks.</li>
+<li>The address is used to add you as a tester and send the link. Nothing else; the app itself
+    collects nothing (<a href="privacy.html">privacy policy</a>).</li>
+<li>Android <strong>7.0 or newer</strong>, and a VNC server of your own to point it at — this is a
+    client, it does not come with one.</li>
+</ul>
+<p class="alt">Would rather not hand over an address? <a
+href="https://github.com/zirize/vncviewer-for-games#build">Build it yourself</a> — same app.</p>
+</div>
+
 <div class="symptoms">
 <h3>What a games-first viewer changes</h3>
 <ul>
