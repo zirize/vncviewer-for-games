@@ -17,6 +17,9 @@
     <string name="conn_retry">Retry</string>
 
     <!-- ── Settings: sections ──────────────────────────────────────── -->
+    <!-- %1$s = versionName (e.g. 1.0), %2$d = versionCode -->
+    <string name="settings_version">v%1$s (%2$d)</string>
+
     <string name="settings_section_keyboard">Keyboard</string>
     <string name="settings_section_quick">Quick settings</string>
     <string name="settings_section_input">Input</string>

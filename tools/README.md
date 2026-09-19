@@ -118,6 +118,10 @@ there, and the result was reported as "input goes out but no screen updates come
    this for a load comparison." (Those numbers were once read as "a light load" and a conclusion
    was published and then withdrawn. The probe now holds the screen awake with
    `svc power stayon true` and restores the original setting via `trap`.)
+   🔑 **Every probe that holds the screen awake restores the setting** - `idle_wake_probe.sh`,
+   `input_lag_probe.sh` and `afterload_probe.sh` all read `stay_on_while_plugged_in` **before**
+   overwriting it and put it back from a `trap EXIT`. Reading it afterwards is the trap to avoid:
+   `stayon true` has already written 7, so you would only ever restore 7.
 3. **Injected input, but the frequency did not move** → "the hardware input booster may not have
    woken. Measure again with a real hand."
 

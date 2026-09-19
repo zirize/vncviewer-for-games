@@ -57,18 +57,20 @@ adb get-state >/dev/null 2>&1 || { echo "🔴 no device attached - check adb dev
 #    Nothing in the instrument shows it, because it is the *device* that went to sleep
 #    ⇒ keep it awake for the duration.
 adb shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1
+# 🔴 `svc power stayon false` does not "turn it off" - it **overwrites** stay_on_while_plugged_in
+#    with 0. On a device set to "never sleep while charging" (=7), every measurement destroyed that
+#    setting. Half of "my phone keeps locking itself" was this.
+#    ⇒ The original value is recorded and restored.
+# 🔑 Recorded **before** `stayon true` - read it afterwards and you only ever read back the 7
+#    that `stayon true` itself just wrote, so the restore would be a no-op on any other device.
+STAYON_WAS="$(adb shell settings get global stay_on_while_plugged_in 2>/dev/null | tr -d '\r')"
+case "$STAYON_WAS" in ''|*[!0-9]*) STAYON_WAS=7 ;; esac
+trap 'adb shell settings put global stay_on_while_plugged_in '"$STAYON_WAS"' >/dev/null 2>&1' EXIT
 adb shell svc power stayon true >/dev/null 2>&1
 # 🔴 Waking it is not enough: after a sleep the notification shade holds focus, the app goes to the
 #    background and **draws nothing**, so the PERF log comes back empty.
 #    One 45-second run was wasted exactly that way.
 adb shell cmd statusbar collapse >/dev/null 2>&1
-# 🔴 `svc power stayon false` does not "turn it off" - it **overwrites** stay_on_while_plugged_in
-#    with 0. On a device set to "never sleep while charging" (=7), every measurement destroyed that
-#    setting. Half of "my phone keeps locking itself" was this.
-#    ⇒ The original value is recorded and restored.
-STAYON_WAS="$(adb shell settings get global stay_on_while_plugged_in 2>/dev/null | tr -d '\r')"
-case "$STAYON_WAS" in ''|*[!0-9]*) STAYON_WAS=7 ;; esac
-trap 'adb shell settings put global stay_on_while_plugged_in '"$STAYON_WAS"' >/dev/null 2>&1' EXIT
 if [ $RESTART = 0 ]; then
   PID=$(adb shell pidof $PKG | tr -d '\r')
   [ -n "$PID" ] || { echo "🔴 $PKG is not running. Launch it, connect to VNC, and try again."; exit 1; }

@@ -136,7 +136,20 @@ android {
             //       before uploading (scripts/verify-signing.sh).
             signingConfig = signingConfigs.findByName("upload")
                 ?: signingConfigs.getByName("debug")
-            isMinifyEnabled = false
+            // 🔑 R8 on: Play Console asks for it, and this is the everyday build.
+            //    Rules and the reasoning live in app/proguard-rules.pro - the short version is
+            //    that only two things here depend on a name surviving: the JNI entry point and
+            //    the enum constants SettingsCodec persists.
+            // 🔴 **Unit tests cannot vouch for a minified build** - they run on the JVM over
+            //    unminified classes, so `build.sh test` stays green no matter what R8 breaks.
+            //    ⇒ After touching R8 config or proguard-rules.pro, install the release APK and
+            //      connect for real. Anything less is the green light that means nothing.
+            isMinifyEnabled = true
+            // 🔑 AGP 9 applies optimized resource shrinking on its own once this is on; the old
+            //    `android.r8.optimizedResourceShrinking` flag was an AGP 8.12-8.13 stopgap and is
+            //    **not** needed here.
+            // ℹ Assets are never shrunk, so profiles/ (wired in above as an asset dir) is untouched.
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

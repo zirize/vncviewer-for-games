@@ -18,6 +18,15 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    // 🔑 Play Console's edge-to-edge check is a **static scan for a call to
+    //    `EdgeToEdge.enable()` in the bytecode**, so the import alone (which is all that was here)
+    //    produces no code and does not satisfy it. It also does what line "setDecorFitsSystemWindows
+    //    (window, false)" below does, so the two agree rather than fight.
+    // 🔴 It must come **before** the bar-hiding calls: those are what we actually want on a
+    //    gamepad overlay, and whatever style this sets applies only to the transient bars that
+    //    appear on a swipe.
+    enableEdgeToEdge()
+
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
         window.attributes.layoutInDisplayCutoutMode = android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
     }

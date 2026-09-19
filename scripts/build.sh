@@ -83,8 +83,29 @@ echo "✅ $OUT  ($(du -h "$OUT" | cut -f1))"
 
 if [ "$MODE" = "install" ]; then
   ADB="$SDK/platform-tools/adb"
-  "$ADB" install -r "$OUT" | tail -1
+  # 🔴 `install -r` **can fail and still leave a green line behind it** - a pipe hides its
+  #    exit status, and the next `echo` does not care. The failure that hides best is
+  #    `INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match` (the device holds a
+  #    debug-signed build, this one is upload-signed): the script says installed, the device keeps
+  #    running the **old** APK, and whatever is measured afterwards is measured on the old build.
+  #    🔑 The lesson from the droid_screamer session, 2026-09-19 - it lost a measurement to it.
+  #    ⇒ Judge on adb's exit status, and then on the device's own `lastUpdateTime`.
+  BEFORE="$("$ADB" shell dumpsys package tech.doldam.remotepad 2>/dev/null \
+            | sed -n 's/.*lastUpdateTime=//p' | head -1 | tr -d '\r')"
+  if ! "$ADB" install -r "$OUT"; then
+    echo "🔴 install failed - the device is still running the previous build"
+    echo "   🔑 'signatures do not match' means the installed copy was signed with a different key."
+    echo "      Uninstall it (this wipes its settings), or build with the same key."
+    exit 1
+  fi
+  AFTER="$("$ADB" shell dumpsys package tech.doldam.remotepad 2>/dev/null \
+           | sed -n 's/.*lastUpdateTime=//p' | head -1 | tr -d '\r')"
+  if [ -n "$BEFORE" ] && [ "$BEFORE" = "$AFTER" ]; then
+    echo "🔴 adb reported success but lastUpdateTime did not move ($AFTER)"
+    echo "   ⇒ the device is still on the old APK. Refusing to claim it installed."
+    exit 1
+  fi
   "$ADB" shell am force-stop tech.doldam.remotepad
   "$ADB" shell monkey -p tech.doldam.remotepad -c android.intent.category.LAUNCHER 1 >/dev/null 2>&1
-  echo "✅ installed and launched"
+  echo "✅ installed and launched (lastUpdateTime $AFTER)"
 fi

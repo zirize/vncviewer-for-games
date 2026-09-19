@@ -62,8 +62,8 @@ to the data.
   "label": "ESC",
   "shape": "rounded",
   "panel": "right",
-  "anchor": "top",
-  "x": 41, "y": 404, "w": 105, "h": 56,
+  "anchor": "bottom",
+  "x": 41, "y": 359, "w": 116, "h": 116,
   "action": { "type": "key", "keysym": "Escape", "behavior": "tap" }
 }
 ```

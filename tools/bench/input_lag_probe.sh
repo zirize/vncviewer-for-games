@@ -47,10 +47,19 @@ cleanup() {
   "$ADB" shell "pkill -f 'input swipe'" >/dev/null 2>&1
   for p in $(pgrep -f 'mpv --really-quiet'); do kill "$p" 2>/dev/null; done
   [ -n "${LOGPID:-}" ] && kill "$LOGPID" 2>/dev/null
+  # 🔴 Put the device's own "stay awake while charging" setting back. `svc power stayon true`
+  #    below **overwrote** it (with 7); leaving it overwritten silently changes the owner's phone.
+  [ -n "${STAYON_WAS:-}" ] && \
+    "$ADB" shell settings put global stay_on_while_plugged_in "$STAYON_WAS" >/dev/null 2>&1
+  return 0
 }
 trap cleanup EXIT
 
 "$ADB" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1
+# 🔑 Captured **before** the overwrite - read it afterwards and you only ever read back the 7
+#    that `stayon true` just wrote.
+STAYON_WAS="$("$ADB" shell settings get global stay_on_while_plugged_in 2>/dev/null | tr -d '\r')"
+case "$STAYON_WAS" in ''|*[!0-9]*) STAYON_WAS=7 ;; esac
 "$ADB" shell svc power stayon true >/dev/null 2>&1
 "$ADB" shell cmd statusbar collapse >/dev/null 2>&1
 

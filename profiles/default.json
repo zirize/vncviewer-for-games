@@ -63,8 +63,9 @@
       "x": 41,  "y": 227, "w": 115, "h": 114,
       "action": { "type": "wheel", "direction": "down", "clicks": 1 } },
 
-    { "id": "esc",      "label": "ESC",    "shape": "rounded", "panel": "right", "anchor": "top",
-      "x": 41,  "y": 404, "w": 105, "h": 56,
+    { "_comment": "ESC sits directly above F, same size and same 52px gap as F-V: ESC / F / V reads as one column.",
+      "id": "esc",      "label": "ESC",    "shape": "rounded", "panel": "right", "anchor": "bottom",
+      "x": 41,  "y": 359, "w": 116, "h": 116,
       "action": { "type": "key", "keysym": "Escape", "behavior": "tap" } },
 
     { "id": "f",        "label": "F",      "shape": "circle",  "panel": "right", "anchor": "bottom",

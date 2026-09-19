@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import io.github.zirize.vncviewerforgames.BuildConfig
 import io.github.zirize.vncviewerforgames.R
 import io.github.zirize.vncviewerforgames.VncSurfaceView
 import io.github.zirize.vncviewerforgames.input.PointerMode
@@ -95,6 +96,8 @@ fun SettingsSheet(view: VncSurfaceView, onDismiss: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             @Suppress("UNUSED_EXPRESSION") tick   // the hook that redraws when a value changes
+
+            AppTitleRow()
 
             PendingBar(view, onReconnect = { view.retryConnection(); changed() })
 
@@ -303,6 +306,39 @@ private fun SendTextRow(onSend: (String, Boolean) -> Unit) {
         TextButton(onClick = { onSend("", true) }) {
             Text(stringResource(R.string.settings_enter_only))
         }
+    }
+}
+
+/**
+ * The app's name and version, at the top of the sheet.
+ *
+ * 🔑 **Why it is here and not on a banner.** There is no banner: the app opens straight into the
+ * remote screen, because anything permanently on top of it would cover the game. This sheet is
+ * the only surface that is *not* the game, so it is the only place identity can live.
+ *
+ * 🔑 **Why it is worth the vertical space** - the name is not the same everywhere. The
+ * `applicationId` and the visible name both follow whether an upload key is present
+ * (`RemotePad` when signed for the store, `VNC for Games` otherwise), so a build can be one of two
+ * apps and look identical. Seeing the name and the version together is how you tell which build a
+ * device is actually running - which is exactly the question that costs an afternoon when a
+ * measurement disagrees with the code.
+ *
+ * 🔴 It is **one line**. The keyboard below it is what people come here for mid-game, and
+ * every row above it pushes that further from the thumb.
+ */
+@Composable
+private fun AppTitleRow() {
+    Row(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.app_name),
+            style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        // ℹ versionName is what a user reads; versionCode is what the store counts, and it is the
+        //   one that tells two builds of the same "1.0" apart.
+        Text(stringResource(R.string.settings_version,
+                BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

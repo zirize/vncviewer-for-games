@@ -14,6 +14,15 @@ LABEL="${1:-run1}"
 for p in $(pgrep -f 'mpv --really-quiet'); do kill "$p" 2>/dev/null; done
 "$ADB" shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1
 "$ADB" shell cmd statusbar collapse >/dev/null 2>&1
+# 🔴 `svc power stayon true` does not "turn something on" - it **overwrites**
+#    stay_on_while_plugged_in with 7, and nothing here ever put it back. On a phone already set to
+#    "never sleep while charging" the value happens to match, so it looked harmless; on any other
+#    one every measurement silently rewrote the owner's setting. Half of "my phone keeps locking
+#    itself" was exactly this (see idle_wake_probe.sh).
+#    ⇒ Read the original **before** overwriting it, and restore it on the way out.
+STAYON_WAS="$("$ADB" shell settings get global stay_on_while_plugged_in 2>/dev/null | tr -d '\r')"
+case "$STAYON_WAS" in ''|*[!0-9]*) STAYON_WAS=7 ;; esac
+trap '"$ADB" shell settings put global stay_on_while_plugged_in '"$STAYON_WAS"' >/dev/null 2>&1' EXIT
 "$ADB" shell svc power stayon true >/dev/null 2>&1
 
 # Background (the small window) - the small updates during the quiet stretch

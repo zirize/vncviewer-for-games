@@ -55,7 +55,8 @@ class OverlayProfileTest {
             Row("settings", null,     ButtonShape.ICON,       "L", "B",   5,   5, 107,  96, "ui:SETTINGS"),
             Row("mwup",     "MWUP",   ButtonShape.MOUSE,      "R", "T",  41,  35, 115, 114, "wheel:8x1"),
             Row("mwdn",     "MWDN",   ButtonShape.MOUSE,      "R", "T",  41, 227, 115, 114, "wheel:16x1"),
-            Row("esc",      "ESC",    ButtonShape.ROUND_RECT, "R", "T",  41, 404, 105,  56, "key:0xff1b:TAP"),
+            // 🔑 ESC moved on 2026-09-17: same size as F/V, directly above F, same 52px gap.
+            Row("esc",      "ESC",    ButtonShape.ROUND_RECT, "R", "B",  41, 359, 116, 116, "key:0xff1b:TAP"),
             Row("f",        "F",      ButtonShape.CIRCLE,     "R", "B",  41, 191, 116, 116, "key:0x66:TAP"),
             Row("v",        "V",      ButtonShape.CIRCLE,     "R", "B",  41,  23, 116, 116, "key:0x76:TAP"),
         )
