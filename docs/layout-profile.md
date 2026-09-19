@@ -126,6 +126,31 @@ not react. The validator rejects any keysym in `A`–`Z` for exactly this reason
 
 ---
 
+## The middle of a side panel may be under a camera
+
+On a phone held in landscape, the display cutout lands on one of the **short edges** - which is
+exactly where these panels live. Measured on two devices: the hole sits at the **outer edge,
+vertically centred** (`Rect(0, 446 - 76, 634)` on one, `Rect(0, 455 - 136, 600)` on another), and
+it is the same band on both.
+
+Two things follow if you are authoring a variant:
+
+* **It depends which way round the phone is held.** Turn it the other way and the cutout moves to
+  the opposite edge, so a button hidden in one grip is fine in the other.
+* **Read the cutout's `boundingRect`, not its safe inset.** The inset says "everything up to here
+  could be unsafe" and on one of those devices that is 136 of the panel's 240 pixels; the bounding
+  rect says where the hole actually is, and there only one button overlapped it. Padding by the
+  inset would throw away half the panel to avoid a hole a fraction of that size.
+
+```bash
+# landscape first - in portrait the cutout reads as a top inset and both sides as zero
+adb shell dumpsys window displays | grep -oE 'mDisplayCutout=DisplayCutout\{insets=Rect\([^)]*\).*?Bounds=\[[^]]*\]'
+```
+
+The shipped profile puts the D-pad in that band on purpose. It is hidden in one of the two grips,
+and that was judged cheaper than moving it somewhere the thumb reaches less comfortably. Placement
+here is a hand-position problem first and a pixel problem second.
+
 ## When a profile is wrong
 
 Two grades, because "the overlay did not appear" is the worst possible outcome:
