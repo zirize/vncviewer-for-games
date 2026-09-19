@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy — RemotePad</title>
+<meta name="description" content="Privacy policy for RemotePad (VNC viewer for games). The app collects nothing, sends nothing to us, and holds no account. It talks only to the VNC server you point it at." />
+<meta name="author" content="zirize" />
+<meta name="robots" content="index, follow" />
+<link rel="canonical" href="https://zirize.github.io/vncviewer-for-games/privacy.html" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://zirize.github.io/vncviewer-for-games/privacy.html" />
+<meta property="og:title" content="Privacy Policy — RemotePad" />
+<meta property="og:description" content="RemotePad collects no personal data, contains no analytics, and connects only to the VNC server you enter." />
+<style>
+:root{--bg:#0f1117;--surface:#1a1d27;--border:#2d3148;--accent:#7c6af7;--accent2:#56c8a0;--text:#e2e4ef;--muted:#8b90b0;--radius:10px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:16px;min-height:100vh;display:flex;flex-direction:column}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+header{background:linear-gradient(135deg,#1a1d27 0%,#12141e 100%);border-bottom:1px solid var(--border);padding:48px 20px 36px;text-align:center}
+header h1{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+header p{font-size:.95rem;color:var(--muted)}
+main{max-width:760px;margin:0 auto;padding:44px 20px;flex:1}
+h2{font-size:1.25rem;margin:38px 0 12px}
+h2:first-child{margin-top:0}
+p{margin:0 0 14px}
+ul{margin:0 0 14px 22px}
+li{margin:6px 0}
+.lede{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:var(--radius);padding:18px 20px;margin-bottom:8px}
+.lede p:last-child{margin-bottom:0}
+code{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-size:.88em}
+footer{text-align:center;padding:32px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem}
+.meta{color:var(--muted);font-size:.88rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>Privacy Policy</h1>
+  <p>RemotePad · <span class="meta">Last updated 19 September 2026</span></p>
+</header>
+<main>
+
+<div class="lede">
+  <p><strong>RemotePad collects nothing.</strong> It has no account, no analytics, no advertising,
+  no crash reporting and no third-party SDKs. Nothing you do in the app is sent to the developer,
+  because there is nowhere for it to be sent — the app has no server.</p>
+</div>
+
+<h2>What the app talks to</h2>
+<p>RemotePad is a VNC client. It opens a network connection to <em>one</em> place: the VNC server
+whose address you type into its settings. That server is yours or someone else's; it is not ours,
+and we have no part in the connection.</p>
+<p>The app declares a single Android permission, <code>android.permission.INTERNET</code>, which is
+what that connection needs. It asks for no other permission — no location, no contacts, no camera,
+no microphone, no storage.</p>
+
+<h2>What is stored, and where</h2>
+<p>The app saves your preferences in Android's private per-app storage
+(<code>SharedPreferences</code>, created with <code>MODE_PRIVATE</code>), on your device. That is:</p>
+<ul>
+  <li>the address and port of the VNC server you last used;</li>
+  <li>your display and input preferences — pointer mode, sensitivity, scrolling, compression,
+      image quality, cursor handling and similar.</li>
+</ul>
+<p><strong>Your VNC password is not saved.</strong> The app deliberately never writes it to storage;
+it is held only for the lifetime of the connection.</p>
+<p>None of this leaves your device by any action of the app.</p>
+
+<h2>Android's own backup</h2>
+<p>The app allows Android's standard backup (<code>allowBackup</code>). If you have device backup
+enabled in your Android settings, the preferences listed above may be copied into <em>your own</em>
+Google account backup, along with the rest of your device. That is a function of Android and your
+Google account, not of this app, and the developer has no access to it. You can turn it off in your
+device's backup settings.</p>
+
+<h2>Children</h2>
+<p>The app is not directed at children and collects no data from anyone, including children.</p>
+
+<h2>Changes to this policy</h2>
+<p>If this policy changes, the updated version will appear at this address with a new date at the
+top. There is no data to migrate or re-consent to, because none is collected.</p>
+
+<h2>Contact</h2>
+<p>Questions about this policy or the app: <a href="mailto:zirize@gmail.com">zirize@gmail.com</a>.</p>
+
+<h2>Source</h2>
+<p>RemotePad is open source. You do not have to take the statements above on trust — the code that
+opens the connection and the code that writes the preferences are both public, and the app declares
+its one permission in a manifest you can read:
+<a href="https://github.com/zirize/vncviewer-for-games">github.com/zirize/vncviewer-for-games</a>.</p>
+
+</main>
+<footer>
+  <p><a href="https://zirize.github.io/vncviewer-for-games/">RemotePad</a> ·
+     <a href="https://zirize.github.io/">zirize</a> ·
+     <a href="https://github.com/zirize/vncviewer-for-games">GitHub</a></p>
+</footer>
+</body>
+</html>
