@@ -22,14 +22,15 @@ and you can regenerate it for whoever is going to hold the phone.
 
 ## Trying it on your phone
 
-RemotePad is going to Google Play, on the **internal testing** track — the track is being set up
-now. That track is invitation only: Play matches the tester list against the account that opens the
-link, so there is no public link to hand out.
+RemotePad is on Google Play, on the **internal testing** track. The track is live, but it is
+invitation only: Play matches the tester list against the account that opens the link, so a link
+does nothing at all for someone who is not on that list. That is why there is no link here.
 
 **Want in? Send the Google account address you would install it with to
 [zirize@gmail.com](mailto:zirize@gmail.com)** — by email, **not in an issue**, so your address does
-not end up on a public page. You go on the tester list, and the link that installs it from Play
-comes back to you as soon as the track opens. It takes up to 100 people.
+not end up on a public page. I add you to the tester list and send the link back to you; it starts
+working once you are on the list, not before. The track holds **up to 100 testers** — more can be
+invited than that, but only the first hundred to join count.
 
 A few things worth knowing before you write:
 
