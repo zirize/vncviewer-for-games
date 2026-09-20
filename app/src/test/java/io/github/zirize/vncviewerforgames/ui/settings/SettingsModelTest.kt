@@ -5,6 +5,7 @@ package io.github.zirize.vncviewerforgames.ui.settings
 
 import io.github.zirize.vncviewerforgames.R
 import io.github.zirize.vncviewerforgames.conn.VncConnectionConfig
+import io.github.zirize.vncviewerforgames.display.ScreenAwakeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -70,5 +71,23 @@ class SettingsModelTest {
     @Test
     fun `the subsampling choice list is in quality order, not numeric order`() {
         assertEquals(listOf(-2, -1, 0, 2, 1, 3), SUBSAMPLING_CHOICES.map { it.first })
+    }
+
+    /**
+     * 🔴 **A mode with no control is a state the user cannot get out of.** Add one to
+     * `ScreenAwakeMode` without adding it here and the sheet simply has no button for it: the
+     * saved value stays in force and nothing on screen says why the screen behaves as it does.
+     * (The same rule `OverlayHitTest.hasSettingsEntry` enforces for the way into settings.)
+     */
+    @Test
+    fun `every screen awake mode can be chosen and has wording`() {
+        assertEquals(ScreenAwakeMode.entries.toList(), SCREEN_AWAKE_CHOICES.map { it.first })
+        // 🔑 Most awake first, so left-to-right means "sleeps sooner".
+        assertEquals(ScreenAwakeMode.ALWAYS, SCREEN_AWAKE_CHOICES.first().first)
+        assertEquals(ScreenAwakeMode.OFF, SCREEN_AWAKE_CHOICES.last().first)
+        for ((mode, short, _) in SCREEN_AWAKE_CHOICES) {
+            assertTrue("no short label for ${'$'}mode", short != 0)
+            assertTrue("no wording for ${'$'}mode", screenAwakeLabelRes(mode) != 0)
+        }
     }
 }

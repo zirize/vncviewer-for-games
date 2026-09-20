@@ -4,6 +4,8 @@
 package io.github.zirize.vncviewerforgames.settings
 
 import io.github.zirize.vncviewerforgames.conn.VncConnectionConfig
+import io.github.zirize.vncviewerforgames.display.ScreenAwakeMode
+import io.github.zirize.vncviewerforgames.display.ScreenConfig
 import io.github.zirize.vncviewerforgames.input.KeyConfig
 import io.github.zirize.vncviewerforgames.input.PointerConfig
 import io.github.zirize.vncviewerforgames.input.PointerMode
@@ -66,6 +68,9 @@ object SettingsCodec {
     const val KEY_SCROLL_SENSITIVITY = "pointer.scrollSensitivity"
     const val KEY_NATURAL_SCROLL = "pointer.naturalScroll"
 
+    // Screen (this device, not the server)
+    const val KEY_SCREEN_AWAKE = "screen.awakeMode"
+
     // Keys
     const val KEY_LATCH_ENABLED = "keys.latchEnabled"
     const val KEY_DOUBLE_TAP_MS = "keys.doubleTapMs"
@@ -95,6 +100,7 @@ object SettingsCodec {
         conn: VncConnectionConfig,
         pointer: PointerConfig,
         keys: KeyConfig,
+        screen: ScreenConfig,
     ): Boolean {
         // 🔑 No version key = nothing has ever been saved. Not an error, and not a reason to write
         //    one either: a fresh install stays empty until the user changes something.
@@ -127,6 +133,12 @@ object SettingsCodec {
             ?.let { pointer.scrollSensitivity = it; mark() }
         readBool(store, KEY_NATURAL_SCROLL)?.let { pointer.naturalScroll = it; mark() }
 
+        // 🔑 An unknown name (a mode this build does not have) leaves the default in place, the
+        //    same as PointerMode above — a downgraded build must not invent a value.
+        store.read(KEY_SCREEN_AWAKE)
+            ?.let { name -> ScreenAwakeMode.entries.firstOrNull { it.name == name } }
+            ?.let { screen.awakeMode = it; mark() }
+
         readBool(store, KEY_LATCH_ENABLED)?.let { keys.latchEnabled = it; mark() }
         readLong(store, KEY_DOUBLE_TAP_MS, DOUBLE_TAP_MS)?.let { keys.doubleTapMs = it; mark() }
         readBool(store, KEY_CLICK_CONSUMES_ONESHOT)
@@ -141,6 +153,7 @@ object SettingsCodec {
         conn: VncConnectionConfig,
         pointer: PointerConfig,
         keys: KeyConfig,
+        screen: ScreenConfig,
     ) {
         store.write(KEY_VERSION, VERSION.toString())
 
@@ -160,6 +173,8 @@ object SettingsCodec {
         store.write(KEY_SENSITIVITY, pointer.sensitivity.toString())
         store.write(KEY_SCROLL_SENSITIVITY, pointer.scrollSensitivity.toString())
         store.write(KEY_NATURAL_SCROLL, pointer.naturalScroll.toString())
+
+        store.write(KEY_SCREEN_AWAKE, screen.awakeMode.name)
 
         store.write(KEY_LATCH_ENABLED, keys.latchEnabled.toString())
         store.write(KEY_DOUBLE_TAP_MS, keys.doubleTapMs.toString())

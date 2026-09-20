@@ -40,6 +40,8 @@
     <string name="settings_two_finger_scroll">Two-finger scroll</string>
     <string name="settings_long_press_right_click">Long press for right click</string>
     <string name="settings_view_only">View only — sends no input at all</string>
+    <!-- %1$s = one of the awake_*_long strings below -->
+    <string name="settings_screen_awake">Keep the screen awake — %1$s</string>
 
     <!-- ── Settings: input ─────────────────────────────────────────── -->
     <string name="settings_cursor_sensitivity">Cursor sensitivity</string>
@@ -104,6 +106,14 @@
     <string name="chroma_auto">Auto</string>
     <string name="chroma_server">Server</string>
     <string name="chroma_mono">Grey</string>
+
+    <string name="awake_always">Always</string>
+    <string name="awake_connected">Connected</string>
+    <string name="awake_off">Off</string>
+
+    <string name="awake_always_long">Always — the screen never times out while the app is in front (default)</string>
+    <string name="awake_connected_long">While connected — it times out once the connection drops, which also stops it retrying</string>
+    <string name="awake_off_long">Off — the system timeout applies, and the screen going off ends the session</string>
 
     <string name="compress_default">Not requested (server default)</string>
     <string name="compress_none">0 — no compression (fast, large)</string>

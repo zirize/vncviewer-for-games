@@ -133,6 +133,18 @@ fun SettingsSheet(view: VncSurfaceView, onDismiss: () -> Unit) {
             SwitchRow(stringResource(R.string.settings_long_press_right_click), view.pointerConfig.longPressRightClick) {
                 view.pointerConfig = view.pointerConfig.copy(longPressRightClick = it); changed()
             }
+            // 🔴 **The one setting whose wrong value looks like a crash.** Watching a game
+            //    involves no hand movement, so the system reads it as "nobody is here", turns the
+            //    screen off and the session ends — reported on 2026-09-16 as "the app dies".
+            //    ⇒ It is in the quick section, not buried: the moment you want it is the moment it
+            //    just happened to you.
+            ChoiceRow(
+                stringResource(R.string.settings_screen_awake,
+                    stringResource(screenAwakeLabelRes(view.screenConfig.awakeMode))),
+                SCREEN_AWAKE_CHOICES, view.screenConfig.awakeMode,
+            ) {
+                view.screenConfig = view.screenConfig.copy(awakeMode = it); changed()
+            }
             // 🔑 Rarely used, so it sits at the bottom of the quick section.
             SwitchRow(stringResource(R.string.settings_view_only), view.viewOnly) {
                 // Turning it on releases what is held first (inside the setter). Otherwise it stays down on the server forever.
@@ -386,10 +398,13 @@ private fun SliderRow(
  * 🔴 **Subsampling must not be a slider.** The constants are 0 = 4:4:4, 1 = 4:2:0, 2 = 4:2:2, so
  * numeric order and quality order **disagree**. As a slider it would read as "further right is
  * better", which is false.
+ *
+ * 🔑 The value type is free, so an enum picks itself (the screen-awake mode) without being given
+ * numbers it does not have.
  */
 @Composable
-private fun ChoiceRow(
-    label: String, choices: List<Triple<Int, Int, String>>, selected: Int, onChange: (Int) -> Unit,
+private fun <T> ChoiceRow(
+    label: String, choices: List<Triple<T, Int, String>>, selected: T, onChange: (T) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
         Text(label, style = MaterialTheme.typography.bodyMedium)

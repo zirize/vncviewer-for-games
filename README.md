@@ -57,6 +57,10 @@ the result is the same app.
   the top; you type with the phone's own keyboard — so your IME's language is your business, not
   this app's — and it goes out as **key presses, not a clipboard paste**, which is why it lands
   inside a game too.
+- **The screen stays awake.** Watching a game is no hand movement at all, so a phone left to
+  itself turns the screen off and ends the session. It is held on by default, and the setting has
+  a middle position — awake only while the connection is live — for a phone that would otherwise
+  sit lit in a pocket retrying.
 - **A settings sheet that opens itself** if the very first connection fails, so a fresh install
   is never a dead end.
 

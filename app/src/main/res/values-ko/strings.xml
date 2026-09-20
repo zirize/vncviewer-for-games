@@ -34,6 +34,7 @@
     <string name="settings_two_finger_scroll">두 손가락 스크롤</string>
     <string name="settings_long_press_right_click">길게 눌러 우클릭</string>
     <string name="settings_view_only">뷰어 온리 — 입력을 한 건도 안 보낸다</string>
+    <string name="settings_screen_awake">화면 꺼짐 방지 — %1$s</string>
 
     <string name="settings_cursor_sensitivity">커서 감도</string>
     <string name="settings_scroll_sensitivity">스크롤 감도</string>
@@ -91,6 +92,14 @@
     <string name="chroma_auto">자동</string>
     <string name="chroma_server">서버</string>
     <string name="chroma_mono">흑백</string>
+
+    <string name="awake_always">항상</string>
+    <string name="awake_connected">접속 중</string>
+    <string name="awake_off">끔</string>
+
+    <string name="awake_always_long">항상 — 앱이 앞에 있는 동안 화면이 꺼지지 않는다 (기본값)</string>
+    <string name="awake_connected_long">접속 중에만 — 연결이 끊기면 화면이 꺼지고, 그러면 재시도도 멈춘다</string>
+    <string name="awake_off_long">끔 — 시스템 설정대로 꺼지고, 꺼지면 «세션이 끊긴다»</string>
 
     <string name="compress_default">요청 안 함 (서버 기본값)</string>
     <string name="compress_none">0 — 압축 안 함 (빠르지만 바이트가 크다)</string>

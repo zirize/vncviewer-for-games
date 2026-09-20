@@ -6,6 +6,7 @@ package io.github.zirize.vncviewerforgames.ui.settings
 import androidx.annotation.StringRes
 import io.github.zirize.vncviewerforgames.R
 import io.github.zirize.vncviewerforgames.conn.VncConnectionConfig
+import io.github.zirize.vncviewerforgames.display.ScreenAwakeMode
 
 /**
  * Human-readable names for settings, used where the screen shows "current vs as-connected".
@@ -114,6 +115,32 @@ val SUBSAMPLING_CHOICES: List<Triple<Int, Int, String>> = listOf(
     Triple(2, 0, "4:2:2"),
     Triple(1, 0, "4:2:0"),
     Triple(3, R.string.chroma_mono, ""),
+)
+
+/**
+ * `awakeMode` in words.
+ *
+ * 🔴 **Every one of these has to say what it costs**, because both mistakes are silent and are
+ * then blamed on the app: OFF ends the session with "it died by itself", and ALWAYS on a phone
+ * left retrying in a pocket ends with "it ate the battery".
+ */
+@StringRes
+fun screenAwakeLabelRes(mode: ScreenAwakeMode): Int = when (mode) {
+    ScreenAwakeMode.ALWAYS -> R.string.awake_always_long
+    ScreenAwakeMode.WHILE_CONNECTED -> R.string.awake_connected_long
+    ScreenAwakeMode.OFF -> R.string.awake_off_long
+}
+
+/**
+ * The screen-awake choices, **most awake first**.
+ * 🔑 Ordered by how long the screen stays on, so left-to-right means one thing. It is not a
+ * slider for the same reason subsampling is not one — but here the order *is* real, and showing it
+ * is what makes "further right sleeps sooner" readable at a glance.
+ */
+val SCREEN_AWAKE_CHOICES: List<Triple<ScreenAwakeMode, Int, String>> = listOf(
+    Triple(ScreenAwakeMode.ALWAYS, R.string.awake_always, ""),
+    Triple(ScreenAwakeMode.WHILE_CONNECTED, R.string.awake_connected, ""),
+    Triple(ScreenAwakeMode.OFF, R.string.awake_off, ""),
 )
 
 /** `compressLevel` in words. */

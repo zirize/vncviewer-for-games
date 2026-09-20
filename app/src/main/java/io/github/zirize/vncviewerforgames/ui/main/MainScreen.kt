@@ -53,16 +53,12 @@ fun MainScreen(modifier: Modifier = Modifier) {
         modifier = Modifier.fillMaxSize(),
         factory = { context ->
             VncSurfaceView(context).apply {
-                // 🔴 **Watching a remote screen involves no hand movement.** Just looking at a
-                //    game reads to the system as "no interaction", so it turns the screen off, the
-                //    activity stops, and the VNC connection drops. That is what the "the app dies"
-                //    report on 2026-09-16 actually was: `screen_off_timeout` was 15 seconds. Not a
-                //    crash, not the low-memory killer — the screen went off.
-                // 🔑 It is a View property, so it is only held while this view is attached; sending
-                //    the app to the background releases it by itself.
-                //    ⚠️ It cannot stop thermal protection from turning the screen off; the system
-                //    wins that one.
-                keepScreenOn = true
+                // 🔴 **`keepScreenOn` is deliberately not set here.** The view owns it: it has to
+                //    be reconsidered every time the connection state moves (the WHILE_CONNECTED
+                //    mode), and a second writer would silently lose that argument. The setting,
+                //    the reason it exists and the 2026-09-16 "the app dies" report behind it are
+                //    in `display/ScreenAwake.kt`; the view puts it in force in its constructor,
+                //    which has already run by the time we are here.
                 // 🔑 Focus is required to receive key input, and inside Compose it does not arrive by itself.
                 isFocusableInTouchMode = true
                 requestFocus()

@@ -4,6 +4,8 @@
 package io.github.zirize.vncviewerforgames.settings
 
 import io.github.zirize.vncviewerforgames.conn.VncConnectionConfig
+import io.github.zirize.vncviewerforgames.display.ScreenAwakeMode
+import io.github.zirize.vncviewerforgames.display.ScreenConfig
 import io.github.zirize.vncviewerforgames.input.KeyConfig
 import io.github.zirize.vncviewerforgames.input.PointerConfig
 import io.github.zirize.vncviewerforgames.input.PointerMode
@@ -31,13 +33,16 @@ private class FakeStore(initial: Map<String, String> = emptyMap()) : SettingsSto
 
 class SettingsCodecTest {
 
-    private fun saved(build: (VncConnectionConfig, PointerConfig, KeyConfig) -> Unit): FakeStore {
+    private fun saved(
+        build: (VncConnectionConfig, PointerConfig, KeyConfig, ScreenConfig) -> Unit,
+    ): FakeStore {
         val store = FakeStore()
         val conn = VncConnectionConfig()
         val pointer = PointerConfig()
         val keys = KeyConfig()
-        build(conn, pointer, keys)
-        SettingsCodec.save(store, conn, pointer, keys)
+        val screen = ScreenConfig()
+        build(conn, pointer, keys, screen)
+        SettingsCodec.save(store, conn, pointer, keys, screen)
         return store
     }
 
@@ -45,10 +50,10 @@ class SettingsCodecTest {
 
     @Test
     fun `the address survives a round trip`() {
-        val store = saved { conn, _, _ -> conn.host = "192.0.2.10"; conn.port = 5901 }
+        val store = saved { conn, _, _, _ -> conn.host = "192.0.2.10"; conn.port = 5901 }
 
         val fresh = VncConnectionConfig()
-        assertTrue(SettingsCodec.load(store, fresh, PointerConfig(), KeyConfig()))
+        assertTrue(SettingsCodec.load(store, fresh, PointerConfig(), KeyConfig(), ScreenConfig()))
         assertEquals("192.0.2.10", fresh.host)
         assertEquals(5901, fresh.port)
     }
@@ -58,23 +63,25 @@ class SettingsCodecTest {
         val conn = VncConnectionConfig()
         val pointer = PointerConfig()
         val keys = KeyConfig()
+        val screen = ScreenConfig()
 
-        assertFalse(SettingsCodec.load(FakeStore(), conn, pointer, keys))
+        assertFalse(SettingsCodec.load(FakeStore(), conn, pointer, keys, screen))
 
         assertEquals(VncConnectionConfig().host, conn.host)
         assertEquals(VncConnectionConfig().port, conn.port)
         assertEquals(VncConnectionConfig().subsampling, conn.subsampling)
         assertEquals(PointerConfig(), pointer)
         assertEquals(KeyConfig(), keys)
+        assertEquals(ScreenConfig(), screen)
     }
 
     @Test
     fun `an emptied host is kept, not treated as absent`() {
-        val store = saved { conn, _, _ -> conn.host = "" }
+        val store = saved { conn, _, _, _ -> conn.host = "" }
 
         val conn = VncConnectionConfig()
         conn.host = "192.0.2.10"
-        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig())
+        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig(), ScreenConfig())
         assertEquals("", conn.host)
     }
 
@@ -87,7 +94,7 @@ class SettingsCodecTest {
         ))
 
         val conn = VncConnectionConfig()
-        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig())
+        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig(), ScreenConfig())
         assertEquals("192.0.2.10", conn.host)
         assertEquals(5901, conn.port)
     }
@@ -96,7 +103,7 @@ class SettingsCodecTest {
 
     @Test
     fun `every setting the sheet offers makes the round trip`() {
-        val store = saved { conn, pointer, keys ->
+        val store = saved { conn, pointer, keys, screen ->
             conn.host = "198.51.100.7"
             conn.port = 5905
             conn.shared = false
@@ -114,12 +121,14 @@ class SettingsCodecTest {
             keys.latchEnabled = true
             keys.doubleTapMs = 450
             keys.mouseClickConsumesOneshot = true
+            screen.awakeMode = ScreenAwakeMode.WHILE_CONNECTED
         }
 
         val conn = VncConnectionConfig()
         val pointer = PointerConfig()
         val keys = KeyConfig()
-        assertTrue(SettingsCodec.load(store, conn, pointer, keys))
+        val screen = ScreenConfig()
+        assertTrue(SettingsCodec.load(store, conn, pointer, keys, screen))
 
         assertEquals("198.51.100.7", conn.host)
         assertEquals(5905, conn.port)
@@ -138,6 +147,36 @@ class SettingsCodecTest {
         assertTrue(keys.latchEnabled)
         assertEquals(450L, keys.doubleTapMs)
         assertTrue(keys.mouseClickConsumesOneshot)
+        assertEquals(ScreenAwakeMode.WHILE_CONNECTED, screen.awakeMode)
+    }
+
+    /**
+     * 🔴 **The one whose default must be restorable.** Holding the screen awake is the default
+     * because the alternative ends the session by itself (2026-09-16), so OFF has to come back
+     * from the store as OFF — silently falling back to the default would look like the setting
+     * does nothing.
+     */
+    @Test
+    fun `screen off survives a round trip`() {
+        val store = saved { _, _, _, screen -> screen.awakeMode = ScreenAwakeMode.OFF }
+
+        val screen = ScreenConfig()
+        assertTrue(SettingsCodec.load(store, VncConnectionConfig(), PointerConfig(), KeyConfig(), screen))
+        assertEquals(ScreenAwakeMode.OFF, screen.awakeMode)
+    }
+
+    /** A mode written by a newer build leaves the default in place rather than being guessed at. */
+    @Test
+    fun `an unknown screen awake mode is ignored`() {
+        val store = FakeStore(mapOf(
+            SettingsCodec.KEY_VERSION to "1",
+            SettingsCodec.KEY_SCREEN_AWAKE to "WHILE_CHARGING",
+        ))
+
+        val screen = ScreenConfig()
+        screen.awakeMode = ScreenAwakeMode.OFF
+        SettingsCodec.load(store, VncConnectionConfig(), PointerConfig(), KeyConfig(), screen)
+        assertEquals(ScreenAwakeMode.OFF, screen.awakeMode)
     }
 
     /**
@@ -146,23 +185,34 @@ class SettingsCodecTest {
      */
     @Test
     fun `adaptive subsampling survives`() {
-        val store = saved { conn, _, _ -> conn.subsampling = VncConnectionConfig.SUBSAMP_ADAPTIVE }
+        val store = saved { conn, _, _, _ -> conn.subsampling = VncConnectionConfig.SUBSAMP_ADAPTIVE }
 
         val conn = VncConnectionConfig()
         conn.subsampling = 0
-        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig())
+        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig(), ScreenConfig())
         assertEquals(VncConnectionConfig.SUBSAMP_ADAPTIVE, conn.subsampling)
     }
 
     /** JPEG off is −1, and −1 is not "out of range". */
     @Test
     fun `quality and compression off survive`() {
-        val store = saved { conn, _, _ -> conn.qualityLevel = -1; conn.compressLevel = -1 }
+        val store = saved { conn, _, _, _ -> conn.qualityLevel = -1; conn.compressLevel = -1 }
 
         val conn = VncConnectionConfig()
-        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig())
+        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig(), ScreenConfig())
         assertEquals(-1, conn.qualityLevel)
         assertEquals(-1, conn.compressLevel)
+    }
+
+    /**
+     * 🔴 **By name, not by number.** Stored as an ordinal, inserting a mode into the middle of the
+     * enum would silently change what every existing install means by its saved value.
+     */
+    @Test
+    fun `the screen awake mode is stored by name`() {
+        val store = saved { _, _, _, screen -> screen.awakeMode = ScreenAwakeMode.WHILE_CONNECTED }
+
+        assertEquals("WHILE_CONNECTED", store.values[SettingsCodec.KEY_SCREEN_AWAKE])
     }
 
     // ── What must never be written ──────────────────────────────────────
@@ -173,19 +223,19 @@ class SettingsCodecTest {
      */
     @Test
     fun `view only is never stored`() {
-        val store = saved { conn, _, _ -> conn.viewOnly = true }
+        val store = saved { conn, _, _, _ -> conn.viewOnly = true }
 
         assertNull(store.values.keys.firstOrNull { it.contains("viewOnly", ignoreCase = true) })
 
         val conn = VncConnectionConfig()
-        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig())
+        SettingsCodec.load(store, conn, PointerConfig(), KeyConfig(), ScreenConfig())
         assertFalse(conn.viewOnly)
     }
 
     /** The password lives in an untracked file precisely so it is not written down. */
     @Test
     fun `the password is never stored`() {
-        val store = saved { conn, _, _ -> conn.password = "hunter2" }
+        val store = saved { conn, _, _, _ -> conn.password = "hunter2" }
 
         assertTrue(store.values.values.none { it == "hunter2" })
         assertNull(store.values.keys.firstOrNull { it.contains("password", ignoreCase = true) })
@@ -197,7 +247,7 @@ class SettingsCodecTest {
      */
     @Test
     fun `settings with no control are not stored`() {
-        val store = saved { _, _, _ -> }
+        val store = saved { _, _, _, _ -> }
 
         listOf("continuousUpdates", "desktopResize", "securityTypes", "encodings", "pixelFormat")
             .forEach { name ->
@@ -219,7 +269,7 @@ class SettingsCodecTest {
         ))
 
         val conn = VncConnectionConfig()
-        assertTrue(SettingsCodec.load(store, conn, PointerConfig(), KeyConfig()))
+        assertTrue(SettingsCodec.load(store, conn, PointerConfig(), KeyConfig(), ScreenConfig()))
         assertEquals("192.0.2.10", conn.host)
         assertEquals(VncConnectionConfig().port, conn.port)
         assertEquals(VncConnectionConfig().shared, conn.shared)
@@ -241,7 +291,7 @@ class SettingsCodecTest {
         val conn = VncConnectionConfig()
         val pointer = PointerConfig()
         val keys = KeyConfig()
-        SettingsCodec.load(store, conn, pointer, keys)
+        SettingsCodec.load(store, conn, pointer, keys, ScreenConfig())
 
         assertEquals(VncConnectionConfig().port, conn.port)
         assertEquals(VncConnectionConfig().qualityLevel, conn.qualityLevel)
@@ -259,7 +309,7 @@ class SettingsCodecTest {
         ))
 
         val pointer = PointerConfig()
-        SettingsCodec.load(store, VncConnectionConfig(), pointer, KeyConfig())
+        SettingsCodec.load(store, VncConnectionConfig(), pointer, KeyConfig(), ScreenConfig())
         assertEquals(PointerConfig().mode, pointer.mode)
     }
 
@@ -272,7 +322,7 @@ class SettingsCodecTest {
         ))
 
         val conn = VncConnectionConfig()
-        assertFalse(SettingsCodec.load(store, conn, PointerConfig(), KeyConfig()))
+        assertFalse(SettingsCodec.load(store, conn, PointerConfig(), KeyConfig(), ScreenConfig()))
         assertEquals(VncConnectionConfig().host, conn.host)
     }
 
@@ -281,7 +331,7 @@ class SettingsCodecTest {
         val store = FakeStore(mapOf(SettingsCodec.KEY_HOST to "192.0.2.10"))
 
         val conn = VncConnectionConfig()
-        assertFalse(SettingsCodec.load(store, conn, PointerConfig(), KeyConfig()))
+        assertFalse(SettingsCodec.load(store, conn, PointerConfig(), KeyConfig(), ScreenConfig()))
         assertEquals(VncConnectionConfig().host, conn.host)
     }
 
@@ -289,7 +339,7 @@ class SettingsCodecTest {
 
     @Test
     fun `saving stamps the version and commits exactly once`() {
-        val store = saved { conn, _, _ -> conn.host = "192.0.2.10" }
+        val store = saved { conn, _, _, _ -> conn.host = "192.0.2.10" }
 
         assertEquals(SettingsCodec.VERSION.toString(), store.values[SettingsCodec.KEY_VERSION])
         assertEquals(1, store.commits)
@@ -305,11 +355,11 @@ class SettingsCodecTest {
 
         "192.0.2.10".forEachIndexed { i, _ ->
             conn.host = "192.0.2.10".substring(0, i + 1)
-            SettingsCodec.save(store, conn, pointer, keys)
+            SettingsCodec.save(store, conn, pointer, keys, ScreenConfig())
         }
 
         val fresh = VncConnectionConfig()
-        SettingsCodec.load(store, fresh, PointerConfig(), KeyConfig())
+        SettingsCodec.load(store, fresh, PointerConfig(), KeyConfig(), ScreenConfig())
         assertEquals("192.0.2.10", fresh.host)
     }
 
@@ -321,8 +371,8 @@ class SettingsCodecTest {
 
         val conn = VncConnectionConfig()
         conn.host = "192.0.2.10"
-        SettingsCodec.save(NoSettingsStore, conn, PointerConfig(), KeyConfig())
-        assertFalse(SettingsCodec.load(NoSettingsStore, conn, PointerConfig(), KeyConfig()))
+        SettingsCodec.save(NoSettingsStore, conn, PointerConfig(), KeyConfig(), ScreenConfig())
+        assertFalse(SettingsCodec.load(NoSettingsStore, conn, PointerConfig(), KeyConfig(), ScreenConfig()))
         assertEquals("192.0.2.10", conn.host)
     }
 }

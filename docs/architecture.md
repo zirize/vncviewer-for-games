@@ -26,6 +26,7 @@ A map of what is where, and which parts you can change without a device.
 | `conn/` | Connection config, connection state, adaptive chroma, the startup-failure watcher |
 | `ui/` | Compose screens: the main screen, the connection banner, the settings sheet |
 | `settings/` | Keeping the settings the user changed between launches |
+| `display/` | What the app does to **this phone's** screen — holding it awake |
 | `perf/` | The one-line-per-second performance counters |
 | (root) | `VncEngine`, `VncSurfaceView`, `CustomPixelBuffer`, `JpegDecoder` |
 
@@ -91,6 +92,25 @@ exception and applies immediately, because the send gate consults it every time.
 If the first connection fails, `StartupFailureWatcher` opens the settings sheet by itself. Without
 that, a wrong address leaves no way in — the only route to settings is the overlay button, and the
 banner only says "retrying".
+
+## Keeping the screen awake
+
+Watching a remote screen involves no hand movement, so the system reads it as "nobody is here",
+turns the screen off, stops the activity and the connection drops. That is what the 2026-09-16
+"the app dies" report was: `screen_off_timeout` was 15 seconds.
+
+`display/ScreenAwakeMode` is the setting that came out of it, and it is a **choice, not a switch**,
+because the two failures are opposite: held awake with nothing connected flattens a battery in a
+pocket, let go mid-game and the session ends. `ALWAYS` (the default, and what the app did before
+the setting existed), `WHILE_CONNECTED`, `OFF`.
+
+`VncSurfaceView` is its only writer. It puts the mode in force in its constructor — before
+anything dials out, so a fresh install is already holding the screen — and again inside
+`publishState`'s `post { }` on every connection-state change, which is what `WHILE_CONNECTED`
+needs. A second writer (it used to be a hard-coded `keepScreenOn = true` in `MainScreen`) would
+silently lose that argument, so there is exactly one.
+
+⚠️ None of it can stop thermal protection from turning the screen off; the system wins that one.
 
 ## Remembering settings
 

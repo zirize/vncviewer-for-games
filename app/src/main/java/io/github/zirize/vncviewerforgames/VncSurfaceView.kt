@@ -36,6 +36,7 @@ import android.view.KeyEvent
 import io.github.zirize.vncviewerforgames.conn.VncConnectionConfig
 import io.github.zirize.vncviewerforgames.conn.StartupFailureWatcher
 import io.github.zirize.vncviewerforgames.conn.VncConnectionState
+import io.github.zirize.vncviewerforgames.display.ScreenConfig
 import io.github.zirize.vncviewerforgames.settings.SettingsCodec
 import io.github.zirize.vncviewerforgames.settings.SettingsStore
 import io.github.zirize.vncviewerforgames.settings.SharedPrefsSettingsStore
@@ -72,6 +73,9 @@ class VncSurfaceView @JvmOverloads constructor(
         //    one (i.e. it would never open). The rules are in StartupFailureWatcher.
         val openSettings = startupFailure.onState(state)
         post {
+            // 🔑 WHILE_CONNECTED is a function of this, so the screen has to be reconsidered on
+            //    every state change - not only when the user touches the setting.
+            applyScreenAwake()
             onStateChanged?.invoke(state)
             if (openSettings) {
                 Log.i("VncSurfaceView", "failed from the start - opening settings " +
@@ -100,6 +104,30 @@ class VncSurfaceView @JvmOverloads constructor(
      * Only viewOnly takes effect immediately.
      */
     var connectionConfig: VncConnectionConfig = VncConnectionConfig()
+
+    /**
+     * What this app does to **the phone's own screen**. Applies immediately.
+     *
+     * 🔴 **Assigning here is what turns `keepScreenOn` on or off** — there is no other writer.
+     *    Setting `keepScreenOn` from anywhere else would be overwritten the next time the
+     *    connection state moves, and the two would then disagree with no way to tell which won.
+     * 🔑 `keepScreenOn` is a View property, so it is only held while this view is attached;
+     *    sending the app to the background releases it by itself.
+     */
+    var screenConfig: ScreenConfig = ScreenConfig()
+        set(value) { field = value; applyScreenAwake() }
+
+    /**
+     * Puts [ScreenConfig.awakeMode] into effect against the connection state of this moment.
+     *
+     * 🔴 **UI thread only.** `setKeepScreenOn` walks the view flags and can invalidate, and the
+     *    connection state arrives on the network thread — so every call site is either the
+     *    constructor or inside a `post { }`.
+     */
+    private fun applyScreenAwake() {
+        keepScreenOn = screenConfig.awakeMode.keepAwake(
+            connectionState is VncConnectionState.Connected)
+    }
 
     /**
      * View only. When true, not a single input event is sent. Applies immediately.
@@ -315,10 +343,15 @@ class VncSurfaceView @JvmOverloads constructor(
         //    `surfaceCreated`, which cannot run until this constructor has returned - so loading
         //    here is what makes the saved address the one that is actually dialled, rather than
         //    one connection going out to the build-time default first.
-        if (SettingsCodec.load(settingsStore, connectionConfig, pointer.config, latch.config)) {
+        if (SettingsCodec.load(
+                settingsStore, connectionConfig, pointer.config, latch.config, screenConfig)) {
             Log.i("VncSurfaceView", "loaded saved settings " +
                     "(${connectionConfig.host}:${connectionConfig.port})")
         }
+        // 🔴 **After the load, and unconditionally.** With nothing saved this is what puts the
+        //    default (hold it awake) in force; the screen turning off mid-game is the failure this
+        //    whole setting exists for, and it must not depend on there being a settings file.
+        applyScreenAwake()
     }
 
     /**
@@ -332,7 +365,8 @@ class VncSurfaceView @JvmOverloads constructor(
      * (`viewOnly` and the password, above all).
      */
     fun saveSettings() {
-        SettingsCodec.save(settingsStore, connectionConfig, pointer.config, latch.config)
+        SettingsCodec.save(
+            settingsStore, connectionConfig, pointer.config, latch.config, screenConfig)
     }
 
     // ── Keyboard ────────────────────────────────────────────────────────
