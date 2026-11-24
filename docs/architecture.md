@@ -93,6 +93,20 @@ If the first connection fails, `StartupFailureWatcher` opens the settings sheet 
 that, a wrong address leaves no way in — the only route to settings is the overlay button, and the
 banner only says "retrying".
 
+**Passwords.** TigerVNC asks for the password synchronously, from inside the handshake on the
+connection thread. `conn/PasswordRequest` parks that thread until the dialog in `MainScreen`
+answers; cancel means an empty password, which ends the attempt as an auth failure (fatal, so not
+retried into a server lockout). An accepted password is kept by `SessionPassword` in memory, per
+`host:port`, so an automatic reconnect does not ask again; an auth failure forgets it. A development
+build may still carry `vnc.dev.password`, which is used without asking.
+
+**Only the current engine is heard.** `VncSurfaceView` hands each engine a `CurrentEngineOnly`
+callback that drops everything once that engine is no longer the current one. A stopped engine
+still reports "Disconnected" on its way out; before the filter, that late report scheduled a
+reconnect that killed the next connection — with the password dialog open, a fresh VncAuth attempt
+went out every second and Xtigervnc blacklisted the device (2026-11-24). Reconnects are also held
+while a password is being asked for, and the server's "Too many security failures" is fatal.
+
 ## Keeping the screen awake
 
 Watching a remote screen involves no hand movement, so the system reads it as "nobody is here",
@@ -129,8 +143,8 @@ Three decisions worth keeping:
   every device that ever ran the app — improving it later (as `subsampling` and `cursorShape` both
   were) would never reach an existing install, and there would be no control to undo it with.
 - **`viewOnly` and the password are never stored.** View-only restored at startup is an app where
-  nothing responds and nothing says why; the password lives in untracked `local.properties`
-  precisely so it is not written down.
+  nothing responds and nothing says why; a typed password lives only in memory (see Connecting),
+  and the development one in untracked `local.properties`, precisely so it is not written down.
 - **A saved address beats `vnc.dev.host`.** It has to, or the user's own address loses to a
   build-time default — so after a save, pointing a device somewhere else means the sheet (or
   clearing the app's data), not `local.properties`.

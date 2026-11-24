@@ -29,8 +29,9 @@ import io.github.zirize.vncviewerforgames.input.PointerMode
  *   - `viewOnly` restored at startup is an app where nothing responds and nothing on screen says
  *     why — the user reads that as broken, not as a setting they left on. It is a per-session
  *     switch by design.
- *   - The password comes from `local.properties`, which is untracked precisely so that no password
- *     is written down; copying it into a preferences file undoes that.
+ *   - A typed password is kept in memory only (`conn/SessionPassword`), and the development one in
+ *     untracked `local.properties`, precisely so that no password is written down; copying either
+ *     into a preferences file undoes that.
  *
  * 🔑 **What is saved wins over `vnc.dev.host` in `local.properties`.** It has to — otherwise the
  * user's own address loses to a build-time default. Pointing a device at a different server after

@@ -9,7 +9,7 @@ An Android VNC client for **playing games** on a remote desktop — not for desk
 Every VNC viewer already out there is built for administering machines: small text, precise
 pointing, a keyboard you summon when you need it. Play a game through one and you spend the
 whole time fighting the client. This one is the other shape: **large touch buttons that are
-always there**, modifiers that latch so you are not holding two fingers down, a D-pad, and a
+always there**, modifiers that can latch so you are not holding two fingers down, a D-pad, and a
 wheel — arranged in the black margins beside the remote screen so they cost you no picture.
 
 The button layout is **data, not code**. It lives in [`profiles/default.json`](profiles/default.json),
@@ -53,7 +53,9 @@ the result is the same app.
   wheel up/down, and free letter keys. Drawn on a 60%-black background with a white outline so
   they stay readable over a bright screen; anywhere that is not a button passes straight through
   to the trackpad.
-- **Latching modifiers.** Tap Ctrl for one-shot, tap twice to lock. You do not need a second hand.
+- **Modifiers that can latch.** By default Ctrl is held while touched, like a game key. Turn on
+  latching in settings and a tap makes it one-shot, a quick second tap locks it, so you do not need
+  a second hand.
 - **Trackpad or absolute pointing.** Long-press for right click, two-finger scroll.
 - **Tight/JPEG decoding on four worker threads**, through libjpeg-turbo with NEON.
 - **Typing, for when the game asks for a name.** The settings sheet opens with a text field at
