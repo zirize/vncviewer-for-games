@@ -23,6 +23,8 @@
   a { color: var(--accent); }
   .box { background: var(--soft); border-left: 4px solid var(--accent); border-radius: 6px; padding: 10px 14px; margin: 10px 0; break-inside: avoid; }
   .warn { background: var(--warn); border-left-color: var(--warnline); }
+  .big { border-left-width: 6px; padding: 12px 16px; }
+  .big p:first-child b { font-size: 12.5pt; }
   .box p:first-child { margin-top: 0; } .box p:last-child { margin-bottom: 0; }
   .link { font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 10pt; word-break: break-all; }
   table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 10pt; break-inside: avoid; }
@@ -44,6 +46,20 @@
 <p>Thank you for testing RemotePad. This guide covers joining the test, connecting to your PC, and
 the on-screen controls. It takes about five minutes to read.</p>
 
+<div class="box warn big">
+  <p><b>Before anything else: set the PC to 1920 × 1080.</b></p>
+  <p>RemotePad shows the PC screen at <b>exactly one PC pixel per phone pixel</b>. It does not zoom
+  or shrink the picture. On a typical phone, whose screen is 1080 pixels tall, a <b>1920 × 1080</b>
+  desktop fills the height exactly and leaves the side margins free for the buttons.</p>
+  <ul>
+    <li><b>Larger</b> (for example 2560 × 1440 or 4K): the edges of the PC screen are <b>cut off</b> and
+        cannot be scrolled into view, and the buttons cover part of the picture.</li>
+    <li><b>Smaller</b> (for example 1280 × 720): the picture sits small in the middle with black around it.</li>
+  </ul>
+  <p>If your phone's screen is not 1080 pixels tall (for example a QHD+ phone that runs at full
+  resolution), the best PC resolution differs. Tell us your phone model and we will help.</p>
+</div>
+
 <h2><span class="n">1</span>Join the test and install</h2>
 <ol class="steps">
   <li>On your phone, make sure the Play Store is signed in with the <b>same Google account</b> you sent
@@ -59,6 +75,8 @@ the on-screen controls. It takes about five minutes to read.</p>
 
 <h2><span class="n">2</span>What you need on the PC</h2>
 <ul>
+  <li><b>The PC's display set to 1920 × 1080</b> (see the box above). Set it in the PC's display
+      settings, or in the VNC server's own settings if it creates its own desktop.</li>
   <li><b>A VNC server</b> running on the PC you want to play on. RemotePad is only a viewer and does not
       include a server. Any standard one works, for example <b>TightVNC</b> or <b>UltraVNC</b> (Windows) or
       <b>TigerVNC</b> or <b>x11vnc</b> (Linux).</li>
@@ -74,7 +92,7 @@ the on-screen controls. It takes about five minutes to read.</p>
 <p>On first launch there is no address yet, so the connection fails and the <b>settings sheet opens
 by itself</b>. That is expected.</p>
 <ol class="steps">
-  <li>Scroll down to <b>Connection</b>. Enter the PC's <b>Server address</b> (for example <code>192.168.0.20</code>)
+  <li>Scroll down to <b>Connection</b>. Enter the PC's <b>Server address</b> (for example <code>192.0.2.10</code>)
       and the <b>Port</b>. The default port is <code>5900</code>. A server on display <code>:1</code> usually uses <code>5901</code>.</li>
   <li>A bar appears at the top saying a setting will apply from the next connection. Tap
       <b>Reconnect now</b>.</li>
@@ -151,6 +169,8 @@ network, lower it or raise <b>Compression level</b>.</p>
       its own, because servers lock out clients that keep guessing. Tap <b>Retry</b> and enter it again.</td></tr>
   <tr><td>"…too many failed logins…"</td><td>The server is refusing the phone for a while after failed
       attempts. Wait a minute or two, then tap <b>Retry</b>.</td></tr>
+  <tr><td>Part of the PC screen is missing, or buttons cover the picture</td><td>The PC resolution is larger
+      than the phone can show 1:1. Set the PC to <b>1920 × 1080</b> and reconnect.</td></tr>
   <tr><td>Nothing responds to touches</td><td>Check that <b>View only</b> is off in settings.</td></tr>
   <tr><td>A key seems stuck down on the PC</td><td>Open and close the settings sheet. Opening it releases every key.</td></tr>
 </table>

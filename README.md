@@ -40,6 +40,9 @@ A few things worth knowing before you write:
   collects nothing; see the [privacy policy](https://zirize.github.io/vncviewer-for-games/privacy.html).
 - Android **7.0 or newer** (API 24).
 - You will need a VNC server to point it at. This is a client; it does not come with one.
+- 🔑 **Set the PC to 1920×1080.** The picture is drawn one remote pixel per screen pixel, never
+  scaled, so on a phone whose screen is 1080 pixels tall that is the size that fits. A larger desktop
+  is cut off at the edges (and cannot be panned); a smaller one sits small in the middle.
 
 If you would rather not hand over an address, build it yourself — the next section is for you, and
 the result is the same app.
