@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RemotePad — Tester Guide</title>
+<style>
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  :root { --ink:#1d2330; --muted:#5b6475; --line:#dde2ea; --accent:#2f5bd3; --soft:#f3f6fb; --warn:#fff5e6; --warnline:#f0b44c; }
+  * { box-sizing: border-box; }
+  body { font: 10.5pt/1.55 "Noto Sans", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); margin: 0 auto; max-width: 820px; padding: 24px; }
+  @media print { body { padding: 0; max-width: none; } }
+  h1 { font-size: 22pt; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 11pt; }
+  h2 { font-size: 13.5pt; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--line); break-after: avoid; }
+  h2 .n { color: var(--accent); margin-right: 6px; }
+  h3 { font-size: 11pt; margin: 14px 0 4px; break-after: avoid; }
+  p { margin: 6px 0; }
+  ul, ol { margin: 6px 0; padding-left: 20px; }
+  li { margin: 3px 0; }
+  code, .k { font-family: "JetBrains Mono", "DejaVu Sans Mono", Consolas, monospace; font-size: 9.5pt; background: var(--soft); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; white-space: nowrap; }
+  .k { font-weight: 600; }
+  a { color: var(--accent); }
+  .box { background: var(--soft); border-left: 4px solid var(--accent); border-radius: 6px; padding: 10px 14px; margin: 10px 0; break-inside: avoid; }
+  .warn { background: var(--warn); border-left-color: var(--warnline); }
+  .box p:first-child { margin-top: 0; } .box p:last-child { margin-bottom: 0; }
+  .link { font-family: "DejaVu Sans Mono", Consolas, monospace; font-size: 10pt; word-break: break-all; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 10pt; break-inside: avoid; }
+  th, td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid var(--line); }
+  th { background: var(--soft); font-weight: 600; }
+  td:first-child { white-space: nowrap; }
+  figure { margin: 10px 0 4px; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 6px; display: block; }
+  figcaption { color: var(--muted); font-size: 9pt; margin-top: 4px; }
+  .steps li { margin: 5px 0; }
+  .foot { margin-top: 26px; color: var(--muted); font-size: 9pt; border-top: 1px solid var(--line); padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>RemotePad — Tester Guide</h1>
+<p class="sub">A VNC viewer for playing games on a remote PC from an Android phone · internal test, version 1.2</p>
+
+<p>Thank you for testing RemotePad. This guide covers joining the test, connecting to your PC, and
+the on-screen controls. It takes about five minutes to read.</p>
+
+<h2><span class="n">1</span>Join the test and install</h2>
+<ol class="steps">
+  <li>On your phone, make sure the Play Store is signed in with the <b>same Google account</b> you sent
+      us. The test only opens for that account.</li>
+  <li>Open the invitation link from our email and tap <b>Accept</b> (or <b>Become a tester</b>).</li>
+  <li>Tap the link to the Play Store page on that screen and install <b>RemotePad</b>.</li>
+</ol>
+<div class="box warn">
+  <p><b>"App not available" or "Item not found"?</b> Almost always the phone is using a different
+  Google account than the one on the tester list. Switch accounts in the Play Store and open the link
+  again. Being added to the list can also take a few minutes to take effect.</p>
+</div>
+
+<h2><span class="n">2</span>What you need on the PC</h2>
+<ul>
+  <li><b>A VNC server</b> running on the PC you want to play on. RemotePad is only a viewer and does not
+      include a server. Any standard one works, for example <b>TightVNC</b> or <b>UltraVNC</b> (Windows) or
+      <b>TigerVNC</b> or <b>x11vnc</b> (Linux).</li>
+  <li><b>A network path</b> from the phone to the PC. The easiest is the same Wi-Fi. From outside, use a VPN
+      (Tailscale, WireGuard, …) instead of opening the VNC port to the internet.</li>
+  <li><b>Authentication:</b> RemotePad supports the standard <b>VNC password</b> and servers with no
+      password. It does not support encrypted logins (TLS/VeNCrypt), RealVNC account sign-in or
+      Windows/macOS user-account logins. On servers that offer a choice, select "VNC password".</li>
+  <li>Android <b>7.0 or newer</b>. A phone in landscape is the intended way to hold it.</li>
+</ul>
+
+<h2><span class="n">3</span>First connection</h2>
+<p>On first launch there is no address yet, so the connection fails and the <b>settings sheet opens
+by itself</b>. That is expected.</p>
+<ol class="steps">
+  <li>Scroll down to <b>Connection</b>. Enter the PC's <b>Server address</b> (for example <code>192.168.0.20</code>)
+      and the <b>Port</b>. The default port is <code>5900</code>. A server on display <code>:1</code> usually uses <code>5901</code>.</li>
+  <li>A bar appears at the top saying a setting will apply from the next connection. Tap
+      <b>Reconnect now</b>.</li>
+  <li>If the server has a password, a dialog asks for it. Type it and tap <b>Connect</b>.
+      <ul>
+        <li>VNC passwords use at most <b>8 characters</b>. Longer passwords are cut to 8 by the protocol itself.</li>
+        <li>The password is kept <b>in memory only</b>, for that server. If the connection drops, the app
+            reconnects without asking again. After you close the app, it asks again next time. It is
+            never saved to storage.</li>
+      </ul></li>
+</ol>
+<p>Address and port <i>are</i> saved, so next time the app connects straight away.</p>
+
+<h2><span class="n">4</span>The screen and the buttons</h2>
+<p>A phone screen is wider than a 16:9 PC desktop, so black margins are left at both sides. The
+buttons live <b>in those margins</b> and never cover the picture. Touching anywhere that is not a
+button controls the mouse.</p>
+<figure>
+  <img src="images/overlay.png" alt="RemotePad screen: remote desktop in the middle, buttons in the left and right margins">
+  <figcaption>The default layout. Left margin: page keys, H, CTRL, Enter, D-pad, settings. Right margin: mouse wheel, ESC, F, V.</figcaption>
+</figure>
+<table>
+  <tr><th>Button</th><th>Sends</th></tr>
+  <tr><td><span class="k">▲</span> <span class="k">▼</span></td><td>Page Up / Page Down</td></tr>
+  <tr><td><span class="k">H</span> <span class="k">F</span> <span class="k">V</span></td><td>The letter keys H, F and V</td></tr>
+  <tr><td><span class="k">CTRL</span></td><td>Left Ctrl. Held while your finger is on it (see §6 for one-tap mode).</td></tr>
+  <tr><td><span class="k">↵</span></td><td>Enter</td></tr>
+  <tr><td>D-pad (four squares)</td><td>Arrow keys</td></tr>
+  <tr><td><span class="k">MWUP</span> <span class="k">MWDN</span></td><td>Mouse wheel up / down, one notch per tap</td></tr>
+  <tr><td><span class="k">ESC</span></td><td>Escape</td></tr>
+  <tr><td><span class="k">•••</span> (bottom left)</td><td>Opens the <b>settings sheet</b>. Swipe it down or tap outside to close.</td></tr>
+</table>
+<p>This layout was made for a particular game. Layouts are a data file in the open-source project,
+so different key sets are possible. If your game needs other keys, tell us which.</p>
+
+<h2><span class="n">5</span>Mouse and touch</h2>
+<table>
+  <tr><th>Gesture</th><th>Does</th></tr>
+  <tr><td>Drag one finger</td><td>Moves the mouse pointer (trackpad mode, the default)</td></tr>
+  <tr><td>Tap</td><td>Left click</td></tr>
+  <tr><td>Long press</td><td>Right click</td></tr>
+  <tr><td>Tap, then touch again and drag</td><td>Click-and-drag (hold the left button while moving)</td></tr>
+  <tr><td>Two-finger drag</td><td>Scroll</td></tr>
+</table>
+<p>With <b>Trackpad mode</b> turned off in settings, the pointer jumps to wherever you touch instead.
+This suits games played by pointing directly. Pointer and scroll sensitivity are adjustable too.</p>
+
+<h2><span class="n">6</span>The settings sheet</h2>
+<h3>Keyboard: typing text on the PC</h3>
+<p>The field at the top of the sheet sends text to the PC, for a save name, a chat line or a
+login box. Type with the phone's own keyboard and tap <b>Send</b>, <b>Send + Enter</b>, or
+<b>Enter only</b>. The text goes out as real key presses, not a paste, so it also works inside games.</p>
+<h3>Quick settings and Input</h3>
+<ul>
+  <li><b>Trackpad mode</b>, <b>Two-finger scroll</b>, <b>Long press for right click</b>: the gestures above.</li>
+  <li><b>View only</b>: watch without sending any input. Not remembered after the app closes.</li>
+  <li><b>Keep the screen awake</b>: <i>Always</i> (default), <i>While connected</i>, or <i>Off</i>. Watching
+      a game involves no touches, so without this the phone would turn its screen off mid-game.</li>
+  <li><b>Tap CTRL to arm it</b>: off by default, so CTRL works like a held key. Turn it on to make one tap
+      apply Ctrl to the next key, and a quick double tap lock it on. That is handy for shortcuts with
+      one hand.</li>
+</ul>
+<h3>Connection, display and performance</h3>
+<p>Settings marked <i>from the next connection</i> wait for <b>Reconnect now</b>. The defaults suit
+most setups. If the picture is too blurry, raise <b>JPEG quality</b>. If it is choppy on a slow
+network, lower it or raise <b>Compression level</b>.</p>
+
+<h2><span class="n">7</span>If something goes wrong</h2>
+<table>
+  <tr><th>You see</th><th>Try</th></tr>
+  <tr><td>"Disconnected — retrying…"</td><td>The PC cannot be reached. Check the address and port, that the
+      VNC server is running, and that the PC's firewall allows the port. The app keeps retrying every second.</td></tr>
+  <tr><td>"Connection failed" · authentication failed</td><td>Wrong password. The app does <b>not</b> retry on
+      its own, because servers lock out clients that keep guessing. Tap <b>Retry</b> and enter it again.</td></tr>
+  <tr><td>"…too many failed logins…"</td><td>The server is refusing the phone for a while after failed
+      attempts. Wait a minute or two, then tap <b>Retry</b>.</td></tr>
+  <tr><td>Nothing responds to touches</td><td>Check that <b>View only</b> is off in settings.</td></tr>
+  <tr><td>A key seems stuck down on the PC</td><td>Open and close the settings sheet. Opening it releases every key.</td></tr>
+</table>
+
+<h2><span class="n">8</span>Feedback</h2>
+<p>Reply to the invitation email with anything you notice: what you were doing, what you expected,
+and what happened instead. Your phone model and the VNC server you use help a lot. Screenshots are welcome.</p>
+<p>You can also leave feedback for testers on the RemotePad Play Store page.</p>
+
+<div class="foot">
+  RemotePad is open source (GPL-2.0-or-later): <a href="https://github.com/zirize/vncviewer-for-games">github.com/zirize/vncviewer-for-games</a>.
+  The app collects no data; see the <a href="https://zirize.github.io/vncviewer-for-games/privacy.html">privacy policy</a>.
+</div>
+
+</body>
+</html>

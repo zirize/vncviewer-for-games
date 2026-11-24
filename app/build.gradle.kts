@@ -58,8 +58,8 @@ android {
         //    🔑 If the console says the code is already in use, **raise it again and rebuild**.
         //       Skipped numbers cost nothing; the only irreversible move is going *down*.
         //    ℹ️ versionName is what users see, so it changes only when the app does.
-        versionCode = 3
-        versionName = "1.1"
+        versionCode = 4
+        versionName = "1.2"
         externalNativeBuild {
             cmake {
                 cppFlags += "-std=c++14"

@@ -61,6 +61,10 @@ the result is the same app.
   itself turns the screen off and ends the session. It is held on by default, and the setting has
   a middle position — awake only while the connection is live — for a phone that would otherwise
   sit lit in a pocket retrying.
+- **Password-protected servers.** When the server asks for a VNC password, a dialog asks you. It
+  is kept in memory for that server only, so a dropped connection reconnects without asking
+  again, and it is never written to storage. A wrong password is not retried by itself: servers
+  lock out clients that keep guessing.
 - **A settings sheet that opens itself** if the very first connection fails, so a fresh install
   is never a dead end.
 

@@ -11,6 +11,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.viewinterop.AndroidView
 import io.github.zirize.vncviewerforgames.VncSurfaceView
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import io.github.zirize.vncviewerforgames.R
+import io.github.zirize.vncviewerforgames.conn.PasswordRequest
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +61,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
   var latch by remember { mutableStateOf<Map<Int, LatchState>>(emptyMap()) }
   var showSettings by remember { mutableStateOf(false) }
   var connState by remember { mutableStateOf<VncConnectionState>(VncConnectionState.Connecting("")) }
+  var passwordRequest by remember { mutableStateOf<PasswordRequest?>(null) }
 
   Box(modifier = modifier.fillMaxSize()) {
     AndroidView(
@@ -71,6 +86,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 //    🔑 `releaseAllInput()` has already happened on the view side, in the same
                 //    order as opening it by hand.
                 onOpenSettings = { showSettings = true }
+                // 🔴 Without this, a published build can reach only servers with no password.
+                onPasswordRequest = { passwordRequest = it }
                 view = this
             }
         },
@@ -158,7 +175,52 @@ fun MainScreen(modifier: Modifier = Modifier) {
     if (v != null && showSettings) {
       SettingsSheet(view = v, onDismiss = { showSettings = false })
     }
+
+    passwordRequest?.let { req ->
+      PasswordDialog(req, onClose = { passwordRequest = null })
+    }
   }
+}
+
+/**
+ * Asks for the VNC password the moment the server wants one.
+ * 🔑 Dismissing it counts as cancel: the attempt then fails as an auth failure and is **not**
+ *    retried automatically (a wrong answer repeated is what trips a server's lockout); the banner's
+ *    Retry asks again.
+ * 🔴 The password is never saved to disk - only kept in memory for this server until the app
+ *    closes (`SessionPassword`).
+ */
+@Composable
+private fun PasswordDialog(request: PasswordRequest, onClose: () -> Unit) {
+  var text by remember(request) { mutableStateOf("") }
+  val submit = { request.answer(text); onClose() }
+  val cancel = { request.cancel(); onClose() }
+  AlertDialog(
+      onDismissRequest = cancel,
+      title = { Text(stringResource(R.string.password_title)) },
+      text = {
+        Column {
+          Text(request.target, style = MaterialTheme.typography.bodySmall)
+          OutlinedTextField(
+              value = text,
+              onValueChange = { text = it },
+              label = { Text(stringResource(R.string.label_password)) },
+              singleLine = true,
+              visualTransformation = PasswordVisualTransformation(),
+              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+              keyboardActions = KeyboardActions(onDone = { submit() }),
+              modifier = Modifier.padding(top = 8.dp),
+          )
+          // ⚠️ The protocol uses at most 8 bytes; saying so beats a mystery "wrong password".
+          if (text.length > 8) {
+            Text(stringResource(R.string.password_truncated), style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp))
+          }
+        }
+      },
+      confirmButton = { TextButton(onClick = submit) { Text(stringResource(R.string.password_connect)) } },
+      dismissButton = { TextButton(onClick = cancel) { Text(stringResource(R.string.settings_cancel)) } },
+  )
 }
 
 /**

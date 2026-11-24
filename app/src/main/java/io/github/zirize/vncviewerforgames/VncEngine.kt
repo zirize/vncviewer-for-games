@@ -290,6 +290,10 @@ class VncEngine(
             if (e is com.tigervnc.rfb.AuthFailureException) {
                 // 🔑 The same credentials give the same answer, so reconnecting is blocked.
                 callback.onFatalFailure("authentication failed: ${e.message}")
+            } else if (e.message?.contains("Too many security failures") == true) {
+                // 🔑 The server's lockout (Xtigervnc's blacklist). Retrying every second only keeps
+                //    knocking on it; stop and let the user retry once it has cooled down.
+                callback.onFatalFailure("the server is refusing this device for now (too many failed logins); wait a minute and retry")
             } else {
                 callback.onConnectionStateChanged("Error: ${e.message}")
             }

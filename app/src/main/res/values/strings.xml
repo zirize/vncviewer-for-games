@@ -118,4 +118,7 @@
     <string name="compress_default">Not requested (server default)</string>
     <string name="compress_none">0 — no compression (fast, large)</string>
     <string name="compress_max">9 — maximum compression (small, but costs CPU to unpack)</string>
+    <string name="password_title">The server asks for a password</string>
+    <string name="password_connect">Connect</string>
+    <string name="password_truncated">VNC uses only the first 8 characters.</string>
 </resources>

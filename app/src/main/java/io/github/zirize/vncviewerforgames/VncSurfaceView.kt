@@ -36,6 +36,8 @@ import android.view.KeyEvent
 import io.github.zirize.vncviewerforgames.conn.VncConnectionConfig
 import io.github.zirize.vncviewerforgames.conn.StartupFailureWatcher
 import io.github.zirize.vncviewerforgames.conn.VncConnectionState
+import io.github.zirize.vncviewerforgames.conn.PasswordRequest
+import io.github.zirize.vncviewerforgames.conn.SessionPassword
 import io.github.zirize.vncviewerforgames.display.ScreenConfig
 import io.github.zirize.vncviewerforgames.settings.SettingsCodec
 import io.github.zirize.vncviewerforgames.settings.SettingsStore
@@ -50,12 +52,43 @@ class VncSurfaceView @JvmOverloads constructor(
     private var vncBitmap: Bitmap? = null
     private val paint = Paint(Paint.FILTER_BITMAP_FLAG)
 
-    private var engine: VncEngine? = null
+    /** 🔑 Volatile: read from engine threads by [CurrentEngineOnly] to drop a stopped engine's late callbacks. */
+    @Volatile private var engine: VncEngine? = null
     private var reconnectScheduled = false
     /** After a failure that retrying cannot help, stop reconnecting automatically. */
     private var fatalFailure = false
     /** Passed up so the UI can tell the user (e.g. ask for the password again). */
     var onConnectionFatal: ((String) -> Unit)? = null
+
+    /**
+     * The server asked for a password; the UI must show a dialog and call [PasswordRequest.answer]
+     * or [PasswordRequest.cancel]. Invoked on the UI thread.
+     * 🔴 If nothing is listening, the network thread waits out [PasswordRequest.TIMEOUT_MS] and then
+     *    fails the attempt - so the UI has to set this.
+     */
+    var onPasswordRequest: ((PasswordRequest) -> Unit)? = null
+    private val sessionPassword = SessionPassword()
+    @Volatile private var activePasswordRequest: PasswordRequest? = null
+
+    /**
+     * Runs on the **network thread**, from inside the security handshake.
+     * 🔑 A password already accepted for this same server in this session is reused without asking,
+     *    so an automatic reconnect does not interrupt the game with a dialog.
+     */
+    private fun askPassword(): String? {
+        val target = "${connectionConfig.host}:${connectionConfig.port}"
+        sessionPassword.lookup(target)?.let { return it }
+        val request = PasswordRequest(target)
+        activePasswordRequest = request
+        post {
+            releaseAllInput()          // 🔑 Same as opening settings: nothing stays held behind a dialog
+            onPasswordRequest?.invoke(request) ?: request.cancel()
+        }
+        val pw = request.await()
+        activePasswordRequest = null
+        if (pw != null) sessionPassword.offer(target, pw)
+        return pw
+    }
 
     /**
      * Called on every connection-state change.
@@ -352,6 +385,9 @@ class VncSurfaceView @JvmOverloads constructor(
         //    default (hold it awake) in force; the screen turning off mid-game is the failure this
         //    whole setting exists for, and it must not depend on there being a settings file.
         applyScreenAwake()
+        // 🔑 Set here, not in the config's defaults: the config is a plain data holder and the
+        //    dialog lives in the UI. The engine reads it at handshake time through the config.
+        connectionConfig.onPasswordRequired = ::askPassword
     }
 
     /**
@@ -514,7 +550,7 @@ class VncSurfaceView @JvmOverloads constructor(
         // 🔑 Release BEFORE engine.stop(): the socket has to still be alive for it to arrive.
         releaseAllInput()
         reconnectScheduled = false
-        engine?.stop()
+        stopEngine()
         engine = null
     }
 
@@ -544,6 +580,7 @@ class VncSurfaceView @JvmOverloads constructor(
 
     override fun onConnectionReady() {
         publishState(VncConnectionState.Connected)
+        sessionPassword.confirm()
         post {
             // Do not carry presses from the old server into the new session (there is nowhere to send them).
             latch.reset()
@@ -566,6 +603,10 @@ class VncSurfaceView @JvmOverloads constructor(
         publishState(VncConnectionState.Failed(message))
         Log.e("VncSurfaceView", "Fatal: $message - not reconnecting")
         fatalFailure = true
+        // 🔑 Fatal failures are an auth failure or the server's lockout; either way drop the
+        //    password so the next attempt (the user pressing Retry) asks again instead of
+        //    repeating a wrong one.
+        sessionPassword.forget()
         post { onConnectionFatal?.invoke(message) }
     }
 
@@ -719,21 +760,63 @@ class VncSurfaceView @JvmOverloads constructor(
     fun retryConnection() {
         fatalFailure = false
         publishState(VncConnectionState.Connecting(""))
-        engine?.stop()
+        stopEngine()
         engine = null
         startEngineIfNeeded()
+    }
+
+    /**
+     * 🔑 Unparks a network thread waiting on a password dialog first: `stop()` closes the socket
+     *    but cannot wake a thread blocked in [PasswordRequest.await], which would otherwise sit
+     *    there until the timeout.
+     */
+    private fun stopEngine() {
+        activePasswordRequest?.cancel()
+        engine?.stop()
     }
 
     private fun startEngineIfNeeded() {
         if (engine != null) return
         Log.d("VncSurfaceView", "Connecting to VNC server at " +
                 "${connectionConfig.host}:${connectionConfig.port}")
-        engine = VncEngine(connectionConfig, this)
-        engine?.start()
+        val gate = CurrentEngineOnly()
+        val e = VncEngine(connectionConfig, gate)
+        gate.owner = e
+        engine = e
+        e.start()
+    }
+
+    /**
+     * Passes an engine's callbacks on **only while that engine is still the current one**.
+     *
+     * 🔴 Found 2026-11-24 with the password dialog: a stopped engine's thread still reports
+     *    "Error"/"Disconnected" on its way out, and that late report scheduled a reconnect which,
+     *    one second later, killed the *new* connection - the one waiting on the dialog - and
+     *    started another, which asked again. Every second one more half-finished VncAuth attempt
+     *    reached the server, and Xtigervnc blacklisted the phone ("Too many security failures")
+     *    within seconds. Before the dialog existed the same race only cost a spare reconnect.
+     */
+    private inner class CurrentEngineOnly : VncEngineCallback {
+        @Volatile var owner: VncEngine? = null
+        private val current get() = owner != null && owner === engine
+        override fun onConnectionStateChanged(state: String) { if (current) this@VncSurfaceView.onConnectionStateChanged(state) }
+        override fun onDesktopSizeChanged(width: Int, height: Int) { if (current) this@VncSurfaceView.onDesktopSizeChanged(width, height) }
+        override fun onFrameUpdated() { if (current) this@VncSurfaceView.onFrameUpdated() }
+        override fun onRequestBitmap(width: Int, height: Int): Bitmap? =
+            this@VncSurfaceView.onRequestBitmap(width, height)
+        override fun onClipboardDataReceived(data: String) { if (current) this@VncSurfaceView.onClipboardDataReceived(data) }
+        override fun onCursorShapeChanged(width: Int, height: Int, hotspotX: Int, hotspotY: Int, argb: ByteArray) {
+            if (current) this@VncSurfaceView.onCursorShapeChanged(width, height, hotspotX, hotspotY, argb)
+        }
+        override fun onConnectionReady() { if (current) this@VncSurfaceView.onConnectionReady() }
+        override fun onFatalFailure(message: String) { if (current) this@VncSurfaceView.onFatalFailure(message) }
     }
 
     private fun scheduleReconnect() {
         if (fatalFailure || reconnectScheduled || !holder.surface.isValid) return
+        // 🔴 Never while a password is being asked for: a reconnect would drop that attempt and
+        //    open another, and the server counts each one as a failed login.
+        if (activePasswordRequest?.isDone == false) return
 
         reconnectScheduled = true
         renderHandler.postDelayed({
@@ -746,7 +829,7 @@ class VncSurfaceView @JvmOverloads constructor(
             //    Measured 2026-09-15: one connection went out *after* the "not reconnecting" log.
             if (fatalFailure) return@postDelayed
 
-            engine?.stop()
+            stopEngine()
             engine = null
             startEngineIfNeeded()
         }, 1000)

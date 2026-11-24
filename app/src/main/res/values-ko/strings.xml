@@ -104,4 +104,7 @@
     <string name="compress_default">요청 안 함 (서버 기본값)</string>
     <string name="compress_none">0 — 압축 안 함 (빠르지만 바이트가 크다)</string>
     <string name="compress_max">9 — 최대 압축 (바이트는 작지만 푸는 데 CPU 를 쓴다)</string>
+    <string name="password_title">서버가 암호를 요구합니다</string>
+    <string name="password_connect">접속</string>
+    <string name="password_truncated">VNC 는 앞의 8글자만 씁니다.</string>
 </resources>
